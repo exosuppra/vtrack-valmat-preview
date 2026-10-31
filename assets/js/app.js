@@ -102,14 +102,31 @@
       var src = d.i18n[L] || {};
       Object.keys(src).forEach(function (k) { if (L === 'en' && src[k] === '') delete VT.i18n.en[k]; else VT.i18n[L][k] = src[k]; });
     });
+    // Pages et images modifiées dans le back-office
+    if (d.content) ['fr', 'en'].forEach(function (L) {
+      var src = d.content[L], c = VT.content[L]; if (!src) return;
+      ['about', 'faq', 'legal'].forEach(function (k) { if (src[k]) c[k] = src[k]; });
+      Object.keys(src.cats || {}).forEach(function (id) { if (c.cats[id] && src.cats[id].intro) c.cats[id].intro = src.cats[id].intro; });
+    });
+    VT.images = d.images || {};
     VT.source = 'api';
     indexCatalog();
     return true;
   }
+  // Sans serveur (aperçu statique) : catalogue généré depuis les tableaux Excel, chargé seulement dans ce cas
+  function loadStaticCatalog() {
+    return new Promise(function (res) {
+      var s = document.createElement('script');
+      s.src = 'assets/js/catalog.js';
+      s.onload = function () { indexCatalog(); res(false); };
+      s.onerror = function () { res(false); };
+      document.head.appendChild(s);
+    });
+  }
   function loadCatalog() {
-    if (!window.fetch || location.protocol === 'file:') return Promise.resolve(false);
+    if (!window.fetch || location.protocol === 'file:') return loadStaticCatalog();
     var ctrl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 3500);
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 6000);
     return fetch(API + 'catalog.php', { headers: { Accept: 'application/json' }, cache: 'no-cache', signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) {
         if (!r.ok || (r.headers.get('content-type') || '').indexOf('json') < 0) throw new Error('catalog ' + r.status);
@@ -117,7 +134,7 @@
       })
       .then(applyCatalog)
       .catch(function () { return false; })
-      .then(function (ok) { clearTimeout(timer); return ok; });
+      .then(function (ok) { clearTimeout(timer); return ok || loadStaticCatalog(); });
   }
 
   /* ------------------------------------------------------------ produits */
@@ -136,6 +153,8 @@
   function pname(p) { return (p.name && p.name[S.lang]) || t('n.' + p.type, { d: dimsLabel(p) }); }
   // Photo : chemin complet venant du back-office (uploads/…, assets/img/…) ou nom de fichier de data.js
   function imgSrc(f) { return !f ? '' : (f.indexOf('/') > -1 ? f : 'assets/img/' + f); }
+  // Image d'un emplacement du site : celle du back-office, sinon l'image d'origine
+  function siteImg(slot, fallback) { return esc((VT.images && VT.images[slot]) || (fallback ? imgSrc(fallback) : '')); }
   // Mention demandée par Valmat sous chaque photo de produit
   function pnc() { return '<span class="pnc">' + t('p.pnc') + '</span>'; }
   // Sans photo : visuel de la référence (sculpture de chenille + cote), en attendant les photos de Valentin
@@ -153,7 +172,7 @@
     return p.stock ? '<span class="badge">' + t('b.stock') + '</span>' : '';
   }
   function avail(p) {
-    return p.stock ? '<p class="avail is-in"><i aria-hidden="true"></i>' + t('p.stock') + '</p>'
+    return p.stock ? '<p class="avail is-in"><i aria-hidden="true"></i>' + (p.qty != null ? t('p.stockQty', { n: p.qty }) : t('p.stock')) + '</p>'
       : '<p class="avail"><i aria-hidden="true"></i>' + t('p.order') + '</p>';
   }
   function fitsLine(p) {
@@ -670,16 +689,16 @@
       if (!hasStock) stock = VT.products.filter(function (p) { return p.home; }).sort(function (a, b) { return (a.sort || 0) - (b.sort || 0); });
       var allLink = hasStock ? href('stock') : href('search');
       var doors = [
-        ['chenilles', 'door-chenilles.jpg', t('r.chenilles'), t('d.chenilles.s'), t('d.chenilles.c'), href('chenilles')],
-        ['patins', 'door-patins.jpg', t('r.patins'), t('d.patins.s'), t('d.patins.c'), href('patins')],
-        ['identifier', 'door-identifier.jpg', t('d.identifier.t'), t('d.identifier.s'), t('d.identifier.c'), href('identifier')],
-        ['autres', null, t('r.autres'), t('d.autres.s'), t('d.autres.c'), href('autres')]
+        ['chenilles', siteImg('door-chenilles', 'door-chenilles.jpg'), t('r.chenilles'), t('d.chenilles.s'), t('d.chenilles.c'), href('chenilles')],
+        ['patins', siteImg('door-patins', 'door-patins.jpg'), t('r.patins'), t('d.patins.s'), t('d.patins.c'), href('patins')],
+        ['identifier', siteImg('door-identifier', 'door-identifier.jpg'), t('d.identifier.t'), t('d.identifier.s'), t('d.identifier.c'), href('identifier')],
+        ['autres', siteImg('door-autres'), t('r.autres'), t('d.autres.s'), t('d.autres.c'), href('autres')]
       ];
       var mq = t('mq').split('|');
       var mqItems = mq.concat(mq).map(function (w, i) { return '<span class="mq-w' + (i % mq.length === 0 ? ' is-o' : '') + '">' + w + '</span><span class="mq-dot" aria-hidden="true"></span>'; }).join('');
       return '' +
         '<section class="hero" data-hero>' +
-        '<div class="hero-media" aria-hidden="true"><img class="hero-img" src="assets/img/hero-excavator.jpg" alt="" fetchpriority="high"><canvas class="hero-dust"></canvas><div class="hero-shade"></div></div>' +
+        '<div class="hero-media" aria-hidden="true"><img class="hero-img" src="' + siteImg('hero', 'hero-excavator.jpg') + '" alt="" fetchpriority="high"><canvas class="hero-dust"></canvas><div class="hero-shade"></div></div>' +
         '<div class="wrap hero-in">' +
         '<p class="eyebrow" data-hero-fade>' + t('h.eyebrow') + '</p>' +
         '<h1 class="hero-title"><span class="ln"><span>' + t('h.t1') + '</span></span><span class="ln"><span>' + t('h.t2') + '</span></span><span class="ln"><span>' + t('h.t3') + '</span></span></h1>' +
@@ -704,7 +723,7 @@
         '<div class="sec-head">' + eyebrow(t('h.doorsEyebrow')) + '<h2 class="h2" id="doors-t" data-split>' + t('h.doorsTitle') + '</h2></div>' +
         '<div class="doors">' + doors.map(function (d, i) {
           return '<a class="door" href="' + d[5] + '" data-reveal="door" data-tilt>' +
-            '<span class="door-media">' + (d[1] ? '<img src="assets/img/' + d[1] + '" alt="" loading="lazy">' : '<span class="ph ph-door"><span>' + t('p.photo') + ' · ' + t('d.autres.s') + '</span></span>') + '</span>' +
+            '<span class="door-media">' + (d[1] ? '<img src="' + d[1] + '" alt="" loading="lazy">' : '<span class="ph ph-door"><span>' + t('p.photo') + ' · ' + t('d.autres.s') + '</span></span>') + '</span>' +
             (d[1] ? pnc() : '') +
             '<span class="door-n mono">0' + (i + 1) + '</span>' +
             '<span class="door-body"><span class="door-t">' + d[2] + '</span><span class="door-s">' + d[3] + '</span><span class="door-c">' + d[4] + ' <i aria-hidden="true">→</i></span></span>' +
@@ -735,7 +754,7 @@
   };
 
   function ctaBlock(query) {
-    return '<section class="cta" aria-labelledby="cta-t"><div class="cta-media" aria-hidden="true"><img src="assets/img/dust.jpg" alt="" loading="lazy" data-parallax="0.18"></div>' +
+    return '<section class="cta" aria-labelledby="cta-t"><div class="cta-media" aria-hidden="true"><img src="' + siteImg('cta', 'dust.jpg') + '" alt="" loading="lazy" data-parallax="0.18"></div>' +
       '<div class="wrap cta-in">' + eyebrow(t('cta.eyebrow')) +
       '<h2 class="h1" id="cta-t" data-split>' + t('cta.title') + '</h2><p class="sec-lead" data-reveal>' + t('cta.text') + '</p>' +
       '<div class="btn-row" data-reveal><a class="btn btn-o btn-lg" href="' + href('contact', null, query) + '" data-magnetic><span>' + t('cta.btn') + '</span></a>' +
@@ -759,7 +778,7 @@
         var body = list.length ? filterBar(list, { state: state, chips: chips, chipsLabel: t('cat.engine'), chipAttr: cfg.chipAttr }) + gridHTML()
           : '<div class="noresult" data-reveal><div class="noresult-ic" aria-hidden="true">' + gearIcon() + '</div><h2 class="h3">' + t('st.empty') + '</h2><p>' + t('st.emptyText') + '</p>' +
             '<div class="btn-row"><a class="btn btn-o" href="' + href('chenilles') + '"><span>' + t('r.chenilles') + '</span></a><a class="btn btn-line" href="' + href('patins') + '"><span>' + t('r.patins') + '</span></a></div></div>';
-        return '<section class="pg-hero cat-hero"><div class="pg-hero-media" aria-hidden="true"><img src="assets/img/' + c.img + '" alt="" data-parallax="0.12"></div>' +
+        return '<section class="pg-hero cat-hero"><div class="pg-hero-media" aria-hidden="true"><img src="' + siteImg('cat-' + id, c.img) + '" alt="" data-parallax="0.12"></div>' +
           '<div class="wrap">' + crumbs([[t('r.' + id)]]) +
           '<h1 class="pg-title" data-split>' + t('r.' + id) + '</h1><p class="pg-lead" data-reveal>' + c.intro + '</p>' +
           (id === 'stock' ? '' : '<div class="cat-qs" data-reveal>' + quickSearch({ tab: id === 'patins' ? 'dims' : 'model', type: id === 'patins' ? 'patins' : 'chenille' }) + '</div>') +
@@ -808,6 +827,12 @@
     if (p.weight) rows.push([t('sp.weight'), num(p.weight) + ' kg']);
     return rows;
   }
+  // Description saisie dans le back-office : une ligne vide sépare les paragraphes, anglais vide = français
+  function descHTML(p) {
+    var txt = p.desc && (p.desc[S.lang] || p.desc.fr || p.desc.en);
+    if (!txt) return '';
+    return '<div class="pr-desc" data-reveal>' + String(txt).split(/\n{2,}/).map(function (para) { return '<p>' + esc(para).replace(/\n/g, '<br>') + '</p>'; }).join('') + '</div>';
+  }
   // Tableau des machines : 12 lignes, puis « Voir les N machines »
   var TBL_ROWS = 12;
   function machinesTable(ms) {
@@ -844,7 +869,7 @@
         '<p class="pcard-type" data-reveal="fade">' + t('ty.' + p.type) + '</p>' +
         '<h1 class="pr-title" data-split>' + pname(p) + '</h1>' +
         '<p class="pr-ref mono" data-reveal="fade">' + t('p.ref') + ' ' + esc(p.ref) + '</p>' +
-        '<div data-reveal="fade">' + avail(p) + '</div>' +
+        '<div data-reveal="fade">' + avail(p) + '</div>' + descHTML(p) +
         '<dl class="specs" data-reveal="stagger">' + specRows(p).map(function (row) { return '<div><dt>' + row[0] + '</dt><dd class="mono">' + esc(row[1]) + '</dd></div>'; }).join('') + '</dl>' +
         '<div class="pr-buy" data-reveal>' +
         '<div class="qty" data-qty><button type="button" data-step="-1" aria-label="' + t('pr.dec') + '">−</button><input type="number" min="1" max="999" value="1" aria-label="' + t('pr.qty') + '"><button type="button" data-step="1" aria-label="' + t('pr.inc') + '">+</button></div>' +
@@ -1341,7 +1366,7 @@
   V.about = {
     html: function () {
       var a = C().about;
-      return '<section class="pg-hero cat-hero"><div class="pg-hero-media" aria-hidden="true"><img src="assets/img/matiere.jpg" alt="" data-parallax="0.12"></div><div class="wrap">' + crumbs([[t('r.about')]]) +
+      return '<section class="pg-hero cat-hero"><div class="pg-hero-media" aria-hidden="true"><img src="' + siteImg('about', 'matiere.jpg') + '" alt="" data-parallax="0.12"></div><div class="wrap">' + crumbs([[t('r.about')]]) +
         '<h1 class="pg-title" data-split>' + a.title + '</h1><p class="pg-lead" data-reveal>' + a.lead + '</p></div><i class="pg-line" aria-hidden="true"></i></section>' +
         '<section class="sec"><div class="wrap about-grid">' + a.blocks.map(function (b, i) {
           return '<div class="about-b" data-reveal><span class="mono about-n">0' + (i + 1) + '</span><h2 class="h3">' + b[0] + '</h2><p>' + b[1] + '</p></div>';

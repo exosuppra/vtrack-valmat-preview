@@ -462,6 +462,9 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .specs > div { display: flex; justify-content: space-between; gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .specs dt { color: var(--mut); font-size: 14px; }
 .specs dd { margin: 0; text-align: right; font-size: 14px; }
+.pr-desc { margin: 20px 0 0; color: #d6dadd; max-width: 62ch; }
+.pr-desc p { margin: 0 0 12px; }
+.pr-desc p:last-child { margin-bottom: 0; }
 .pr-buy { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
 .pr-info > .price { margin-top: 14px; }
 .qty { display: inline-flex; align-items: stretch; border: 1px solid var(--line2); height: 56px; }
