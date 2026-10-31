@@ -306,7 +306,7 @@
   }
   function customLabel(i) {
     return Object.keys(i.dims).filter(function (k) { return i.dims[k] !== ''; })
-      .map(function (k) { return k + ' ' + num(i.dims[k]); }).join(' · ');
+      .map(function (k) { return (k === 'N' ? t('qs.links') : k) + ' ' + num(i.dims[k]); }).join(' · ');
   }
   function lineLabel(i) {
     if (i.custom) return t('q.custom') + ' · ' + t('ty.' + i.type) + ' · ' + customLabel(i);
@@ -326,7 +326,7 @@
     setTimeout(kill, action && action.sticky ? 9000 : 3600);
   }
 
-  /* ------------------------------------------------------------ schémas cotés */
+  /* ------------------------------------------------------------ schémas */
   function dimH(x1, x2, y, k, v, o) {
     o = o || {};
     var ext = (o.ext || []).map(function (e) { return '<line class="ext" x1="' + e[0] + '" y1="' + e[1] + '" x2="' + e[2] + '" y2="' + e[3] + '" pathLength="1"/>'; }).join('');
@@ -357,7 +357,7 @@
         '<rect class="part" x="60" y="80" width="420" height="130" rx="10"/>' +
         '<path class="guide" d="M224 118L238 168M336 118L322 168"/>' +
         hole(224, 118) + hole(336, 118) + hole(238, 168) + hole(322, 168) +
-        '<path class="call" d="M336 118L396 68H410"/><text class="lbl" x="414" y="72">' + L.holes + ' (' + (d.bolt || 'M12') + ')</text>' +
+        '<path class="call" d="M336 118L380 72H390"/><text class="lbl" x="394" y="77">' + L.holes + ' (' + (d.bolt || 'M12') + ')</text>' +
         dimH(224, 336, 56, 'A', d.A, { ext: [[224, 62, 224, 108], [336, 62, 336, 108]] }) +
         dimH(238, 322, 240, 'B', d.B, { ext: [[238, 178, 238, 246], [322, 178, 322, 246]] }) +
         dimV(190, 118, 168, 'C', d.C, { ext: [[213, 118, 184, 118], [227, 168, 184, 168]] }) +
@@ -375,7 +375,6 @@
       return svgWrap('0 0 560 240',
         '<rect class="link" x="62" y="48" width="431" height="24" rx="12"/>' + axes + pads +
         '<line class="ground" x1="40" y1="150" x2="530" y2="150"/><text class="lbl" x="44" y="166">' + L.ground + '</text>' +
-        '<path class="call" d="M120 92L104 30"/><text class="lbl" x="40" y="22">' + L.core + '</text>' +
         '<path class="call" d="M480 52L492 30"/><text class="lbl" x="452" y="22">' + L.axis + '</text>' +
         dimH(210, 345, 34, 'P', d.p, { ext: [[210, 40, 210, 52], [345, 40, 345, 52]] }) +
         dimH(227, 328, 190, 'l', d.l, { ext: [[227, 152, 227, 196], [328, 152, 328, 196]] }) +
@@ -429,7 +428,7 @@
         '<rect class="tile" x="150" y="52" width="260" height="12"/><path class="tile" d="M262 64h36l-4 24h-28z"/>' +
         '<path class="pad" d="M170 64H260V92H300V64H390V150a6 6 0 0 1-6 6H176a6 6 0 0 1-6-6Z"/>' +
         '<path class="clip" d="M150 44h22v8h-14v20h-8z"/><path class="clip" d="M410 44h-22v8h14v20h8z"/>' +
-        '<path class="call" d="M150 58H98"/><text class="lbl" x="40" y="62">' + L.tile + '</text>' +
+        '<path class="call" d="M150 58H106"/><text class="lbl" x="22" y="63">' + L.tile + '</text>' +
         '<path class="call" d="M284 78L318 30H340"/><text class="lbl" x="344" y="34">' + L.rib + '</text>' +
         dimH(170, 390, 210, 'W', d.W, { ext: [[170, 158, 170, 216], [390, 158, 390, 216]] }) +
         dimH(260, 300, 182, 'W1', d.W1, { ext: [[260, 94, 260, 188], [300, 94, 300, 188]] }) +
@@ -448,7 +447,7 @@
         '<rect class="band" x="40" y="60" width="480" height="130" rx="4"/>' + lugs + ticks +
         dimV(22, 60, 190, 'W', d.w, { ext: [[38, 60, 16, 60], [38, 190, 16, 190]] }) +
         dimH(172, 232, 38, 'P', d.p, { ext: [[172, 44, 172, 62], [232, 44, 232, 62]] }) +
-        '<text class="dt" x="290" y="240" text-anchor="middle">N = <tspan data-v="N">' + d.l + '</tspan> · ' + L.count + '</text>',
+        '<text class="dt" x="290" y="240" text-anchor="middle"><tspan data-v="N">' + d.l + '</tspan> = ' + L.count + '</text>',
         'Track, ' + L.width);
     },
     trackFlank: function (d, L) {
@@ -517,7 +516,7 @@
       '<form class="qs-panel qs-dims" data-qs-panel="dims"' + (tab === 'dims' ? '' : ' hidden') + '>' +
       '<label class="sel sel-type"><span class="sr">' + t('qs.type') + '</span><select name="type" aria-label="' + t('qs.type') + '">' +
       '<option value="chenille">' + t('ty.chenille') + '</option><option value="patins"' + (isPad ? ' selected' : '') + '>' + t('ty.patins') + '</option></select></label>' +
-      '<label class="fld"><span data-wlabel>' + (isPad ? t('qs.tile') : t('qs.width')) + '</span><input name="w" inputmode="decimal" autocomplete="off" placeholder="400" value="' + esc(pre.w || '') + '"></label>' +
+      '<label class="fld"><span>' + t('qs.width') + '</span><input name="w" inputmode="decimal" autocomplete="off" placeholder="400" value="' + esc(pre.w || '') + '"></label>' +
       '<label class="fld"><span>' + t('qs.pitch') + '</span><input name="p" inputmode="decimal" autocomplete="off" placeholder="' + (isPad ? '135' : num(72.5)) + '" value="' + esc(pre.p || '') + '"></label>' +
       '<label class="fld" data-links' + (isPad ? ' hidden' : '') + '><span>' + t('qs.links') + '</span><input name="l" inputmode="numeric" autocomplete="off" placeholder="74" value="' + esc(pre.l || '') + '"></label>' +
       '<button class="btn btn-o qs-go" type="submit" data-magnetic><span>' + t('qs.go') + '</span></button></form>' +
@@ -558,7 +557,6 @@
       ts.addEventListener('change', function () {
         var pad = ts.value !== 'chenille';
         $('[data-links]', df).hidden = pad;
-        $('[data-wlabel]', df).textContent = pad ? t('qs.tile') : t('qs.width');
         $('input[name="p"]', df).placeholder = pad ? '135' : num(72.5);
       });
       df.addEventListener('submit', function (e) {
@@ -993,7 +991,7 @@
       '<form class="measure" data-measure="' + tab + '"><div class="measure-hd"><h3 class="mini-t">' + t('g.measure') + '</h3><p>' + t('g.measureText') + '</p></div>' +
       '<div class="measure-fields">' + GUIDE_FIELDS[tab].map(function (f) {
         var v = ex[f[0]];
-        return '<label class="mfield" data-for="' + f[1] + '"><span class="mono">' + f[1] + '</span><input name="' + f[0] + '" data-key="' + f[1] + '" ' + (f[0] === 'g' ? '' : 'inputmode="decimal" ') + 'autocomplete="off" placeholder="' + num(v) + '"></label>';
+        return '<label class="mfield" data-for="' + f[1] + '"><span class="mono">' + (f[1] === 'N' ? t('qs.links') : f[1]) + '</span><input name="' + f[0] + '" data-key="' + f[1] + '" ' + (f[0] === 'g' ? '' : 'inputmode="decimal" ') + 'autocomplete="off" placeholder="' + num(v) + '"></label>';
       }).join('') + '</div>' +
       '<div class="measure-act"><button class="btn btn-o" type="button" data-measure-add data-magnetic><span>' + t('g.addCustom') + '</span></button>' +
       '<button class="btn btn-line" type="button" data-measure-search><span>' + t('g.searchDims') + '</span></button>' +

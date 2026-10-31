@@ -371,7 +371,7 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .id-draw { position: relative; padding: 50px 16px 18px; background-color: var(--a); border: 1px solid var(--line); }
 .id-draw .sheet-tag { position: absolute; top: 16px; left: 18px; }
 .id-draw, .sheet-fig, .pitch-box, .pr-draw { background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px); background-size: 24px 24px; }
-.sheet-tag { display: block; font: 500 11px/1.3 var(--fm); color: var(--mut); letter-spacing: .06em; text-transform: uppercase; }
+.sheet-tag { display: block; font: 500 13px/1.3 var(--fm); color: var(--mut); letter-spacing: .06em; text-transform: uppercase; }
 
 /* engagements */
 .commit { padding: clamp(64px, 8vw, 120px) 0; background: var(--a2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -457,11 +457,14 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .seg button { padding: 10px 13px; background: none; border: 0; color: var(--mut); font: 600 12px var(--fc); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: color .3s, background .3s; }
 .seg [aria-selected="true"] { background: var(--o); color: var(--ink); }
 .pr-title { font: 700 clamp(40px, 5vw, 74px)/.92 var(--fc); text-transform: uppercase; margin: 8px 0 12px; }
-.pr-ref { color: var(--o); margin: 0 0 6px; font-size: 14px; }
+.pr-ref { color: var(--o); margin: 0 0 6px; font-size: 16px; }
+.pr-info .pcard-type { font-size: 13px; }
+.pr-info .avail { font-size: 14px; }
+.pr .mono-note, .sec-dark .mono-note { font-size: 14px; color: var(--mut); }
 .specs { margin: 26px 0; border-top: 1px solid var(--line); }
 .specs > div { display: flex; justify-content: space-between; gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-.specs dt { color: var(--mut); font-size: 14px; }
-.specs dd { margin: 0; text-align: right; font-size: 14px; }
+.specs dt { color: #c3c8ce; font-size: 16px; }
+.specs dd { margin: 0; text-align: right; font-size: 16px; }
 .pr-desc { margin: 20px 0 0; color: #d6dadd; max-width: 62ch; }
 .pr-desc p { margin: 0 0 12px; }
 .pr-desc p:last-child { margin-bottom: 0; }
@@ -476,7 +479,7 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .qty-s button { width: 34px; font-size: 17px; }
 .qty-s input { width: 42px; font-size: 14px; }
 .pr-reassure { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 9px; }
-.pr-reassure li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #c6cbd0; }
+.pr-reassure li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #c6cbd0; }
 .pr-reassure li::before { content: ''; width: 13px; height: 7px; border-left: 2px solid var(--o); border-bottom: 2px solid var(--o); transform: rotate(-45deg) translateY(-3px); flex: none; }
 .pr-check { margin: 22px 0 0; color: var(--mut); font-size: 14px; }
 .draw-pair { display: grid; gap: 18px; }
@@ -495,11 +498,11 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .xref { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .xref li { padding: 9px 13px; border: 1px solid var(--line2); color: var(--o); font-size: 14px; }
 
-/* schémas cotés */
+/* schémas */
 .draw { display: block; width: 100%; height: auto; overflow: visible; }
 .draw text { font-family: var(--fm); }
-.draw .lbl { font-family: var(--fb); font-size: 12px; fill: #a9afb6; }
-.draw .lbl-c { font-size: 14px; fill: #8d949b; }
+.draw .lbl { font-family: var(--fb); font-size: 15px; fill: #c3c8ce; }
+.draw .lbl-c { font-size: 17px; fill: #a9afb6; }
 .draw .part { fill: #3b4047; stroke: #a3aab2; stroke-width: 1.5; }
 .draw .pad { fill: #24272b; stroke: #8a9199; stroke-width: 1.2; }
 .draw .core { fill: #9aa1aa; }
@@ -522,7 +525,7 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .draw .dl { stroke: var(--o); stroke-width: 1.4; fill: none; stroke-dasharray: 1; transition: stroke-width .25s; }
 .draw .ext { stroke: var(--o); stroke-width: .8; opacity: .55; stroke-dasharray: 1; transition: opacity .25s; }
 .draw .ah { fill: var(--o); }
-.draw .dt { fill: var(--o); font-size: 13px; font-weight: 500; }
+.draw .dt { fill: var(--o); font-size: 16px; font-weight: 500; }
 .draw .dim { transition: filter .3s; }
 .draw .dim.is-hl { filter: drop-shadow(0 0 6px rgba(238, 123, 26, .85)); }
 .draw .dim.is-hl .dl { stroke-width: 2.6; }
@@ -530,7 +533,7 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .draw .dim.is-hl .dt { font-weight: 700; fill: #ffb47a; }
 .draw .band { fill: #17191c; stroke: #5b6168; }
 .draw .lug { fill: #393e45; stroke: #5d636b; }
-.draw .tick { fill: #7d848c; font-size: 11px; }
+.draw .tick { fill: #a9afb6; font-size: 13px; }
 .draw .loop { fill: none; stroke: #2f3338; stroke-width: 18; stroke-dasharray: 7 5; animation: loop .9s linear infinite; }
 .draw .loop-in { fill: none; stroke: #4a4f56; stroke-width: 1.5; }
 .draw .idler { fill: #33373d; stroke: #8b929a; stroke-width: 2; }
@@ -538,13 +541,13 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .draw .roller { fill: #33373d; stroke: #8b929a; }
 .draw .sprk path { fill: #c3c8ce; }
 .draw .sprk { animation: spin 6s linear infinite; transform-box: fill-box; transform-origin: center; }
-.draw .mark { fill: var(--o); font-size: 22px; font-weight: 500; letter-spacing: .03em; }
+.draw .mark { fill: var(--o); font-size: 24px; font-weight: 500; letter-spacing: .03em; }
 .draw.pitch .ml { stroke: var(--o); stroke-width: 2; }
-.draw .mv { fill: var(--o); font-size: 15px; font-weight: 500; }
+.draw .mv { fill: var(--o); font-size: 17px; font-weight: 500; }
 .draw .pb { fill: none; stroke: var(--mut2); stroke-width: 1; }
-.draw .pbt { fill: var(--mut); font-size: 12px; }
+.draw .pbt { fill: var(--mut); font-size: 14px; }
 .draw .pill { fill: var(--o); }
-.draw .pres text { fill: var(--ink); font-size: 15px; font-weight: 600; }
+.draw .pres text { fill: var(--ink); font-size: 16px; font-weight: 600; }
 @media (max-width: 699px) {
   .draw .dt { font-size: 19px; font-weight: 600; }
   .draw .lbl, .draw .call { display: none; }

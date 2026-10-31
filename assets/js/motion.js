@@ -289,7 +289,7 @@
       gsap.fromTo(el, { yPercent: -f * 50 }, { yPercent: f * 50, ease: 'none', scrollTrigger: { trigger: el.parentNode, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
 
-    // schémas cotés
+    // schémas
     $$('svg[data-draw]', scope).forEach(function (svg) {
       if (svg.closest('[data-scrub-draw]') || svg.closest('[hidden]')) return;
       var tl = drawTL(svg);
