@@ -411,14 +411,14 @@
         'Bolt-On, ' + L.tile);
     },
     clipTop: function (d, L) {
-      var clip = function (x, y) { return '<rect class="clip" x="' + x + '" y="' + y + '" width="36" height="16" rx="3"/>'; };
+      var clip = function (x) { return '<rect class="clip" x="' + x + '" y="46" width="36" height="146" rx="3"/>'; };
       return svgWrap('0 0 560 260',
         '<rect class="tile-d" x="48" y="44" width="444" height="150" rx="6"/>' +
         '<rect class="part" x="60" y="56" width="420" height="126" rx="10"/>' +
-        clip(78, 46) + clip(426, 46) + clip(78, 176) + clip(426, 176) +
+        clip(60) + clip(444) +
         '<text class="lbl lbl-c" x="270" y="124" text-anchor="middle">' + L.nodrill + '</text>' +
-        '<path class="call" d="M444 50L430 26H330"/><text class="lbl" x="330" y="20">' + L.clips + '</text>' +
-        dimH(60, 480, 228, 'L', d.L, { ext: [[60, 184, 60, 234], [480, 184, 480, 234]] }) +
+        '<path class="call" d="M462 50L444 26H330"/><text class="lbl" x="330" y="20">' + L.clips + '</text>' +
+        dimH(60, 480, 228, 'L', d.L, { ext: [[60, 194, 60, 234], [480, 194, 480, 234]] }) +
         dimV(516, 56, 182, 'W', d.W, { side: 'r', ext: [[482, 56, 522, 56], [482, 182, 522, 182]] }),
         'Clip-On, ' + L.nodrill);
     },
