@@ -58,7 +58,6 @@
     header();
     navIndicator();
     $$('[data-magnetic]').forEach(magnet);
-    logoHover();
     footerWord();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (window.ScrollTrigger) ScrollTrigger.refresh(); });
     window.addEventListener('resize', function () { marquees.forEach(function (m) { m.half = 0; }); });
@@ -111,12 +110,6 @@
     });
     el.addEventListener('pointerleave', function () { rx(0); ry(0); });
   }
-  function logoHover() {
-    $$('[data-logo-link]').forEach(function (a) {
-      var gear = $('.lg-gear', a); if (!gear) return;
-      a.addEventListener('mouseenter', function () { gsap.to(gear, { rotation: '-=45', svgOrigin: '222 297', duration: 0.8, ease: 'back.out(1.6)' }); });
-    });
-  }
   function footerWord() {
     var w = $('[data-ft-word]'); if (!w || !window.ScrollTrigger || RM) return;
     var spans = $$('span', w);
@@ -135,20 +128,28 @@
       var seen = false; try { seen = sessionStorage.getItem('vt.pl') === '1'; sessionStorage.setItem('vt.pl', '1'); } catch (e) { /* */ }
       if (!pl) { res(); return; }
       if (RM || seen) { pl.remove(); res(); return; }
-      var c = { v: 0 }, out = $('.pl-num', pl);
-      var q = gsap.utils.selector(pl);
+      // Le logo Valmat se trace, se remplit, puis rejoint sa place dans l'en-tête
+      var q = gsap.utils.selector(pl), logo = $('.pl-logo', pl), parts = q('.vm-p');
+      var mark = $('.hdr-logo svg');
+      parts.forEach(function (p) { p.setAttribute('pathLength', '1'); });
+      gsap.set(parts, { fillOpacity: 0, strokeDasharray: '1 1', strokeDashoffset: 1 });
+      if (mark) gsap.set(mark, { visibility: 'hidden' });
       var tl = gsap.timeline();
-      tl.fromTo(q('.pl-gear'), { rotation: -140, scale: 0.6, opacity: 0, svgOrigin: '222 297' }, { rotation: 0, scale: 1, opacity: 1, duration: 1.3, ease: 'expo.out' }, 0)
-        .fromTo(q('.pl-vi'), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(2)' }, 0.35)
-        .fromTo(q('.pl-l'), { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: 'expo.out', stagger: 0.045 }, 0.5)
-        .fromTo(q('.pl-sub'), { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.9)
-        .fromTo(q('.pl-bar i'), { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: 'power2.inOut' }, 0.25)
-        .to(c, { v: 100, duration: 1.4, ease: 'power2.inOut', onUpdate: function () { out.textContent = String(Math.round(c.v)).padStart(3, '0'); } }, 0.25)
-        .to(q('.pl-gear'), { rotation: 225, duration: 1.7, ease: 'power2.inOut' }, 0.8)
-        .to(q('.pl-in'), { y: -50, opacity: 0, duration: 0.5, ease: 'power3.in' }, 1.85)
-        .add(res, 2.1)
-        .to(q('.pl-p'), { yPercent: -100, duration: 1, ease: 'expo.inOut', stagger: 0.08 }, 2.05)
-        .add(function () { pl.remove(); });
+      tl.fromTo(q('.vm-val'), { x: -150 }, { x: 0, duration: 1.4, ease: 'expo.out' }, 0.1)
+        .fromTo(q('.vm-mat'), { x: 150 }, { x: 0, duration: 1.4, ease: 'expo.out' }, 0.1)
+        .to(parts, { strokeDashoffset: 0, duration: 0.9, stagger: 0.08, ease: 'power2.inOut' }, 0.1)
+        .fromTo(q('.pl-bar i'), { scaleX: 0 }, { scaleX: 1, duration: 1.5, ease: 'power2.inOut' }, 0.1)
+        .to(parts, { fillOpacity: 1, duration: 0.45, stagger: 0.06, ease: 'power2.out' }, 0.8)
+        .to(parts, { strokeOpacity: 0, duration: 0.3 }, 1.4)
+        .to(q('.pl-bar'), { opacity: 0, duration: 0.25 }, 1.6)
+        .add(function () {
+          if (!mark) return;
+          var a = logo.getBoundingClientRect(), b = mark.getBoundingClientRect();
+          gsap.to(logo, { x: b.left + b.width / 2 - a.left - a.width / 2, y: b.top + b.height / 2 - a.top - a.height / 2, scale: b.width / a.width, duration: 1, ease: 'expo.inOut' });
+        }, 1.75)
+        .to(q('.pl-p'), { yPercent: -100, duration: 1, ease: 'expo.inOut', stagger: 0.08 }, 1.85)
+        .add(res, 1.95)
+        .add(function () { if (mark) gsap.set(mark, { clearProps: 'visibility' }); pl.remove(); }, 2.95);
     });
   }
 
@@ -162,7 +163,7 @@
       gsap.timeline({ onComplete: res })
         .fromTo(q('.pt-a'), { yPercent: 100 }, { yPercent: 0, duration: 0.55, ease: 'expo.inOut' }, 0)
         .fromTo(q('.pt-b'), { yPercent: 100 }, { yPercent: 0, duration: 0.55, ease: 'expo.inOut' }, 0.07)
-        .fromTo(q('.pt-gear'), { rotation: -90, opacity: 0, svgOrigin: '222 297' }, { rotation: 0, opacity: 1, duration: 0.7, ease: 'expo.out' }, 0.28)
+        .fromTo(q('.pt-icon'), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out' }, 0.28)
         .fromTo(q('.pt-label'), { yPercent: 110 }, { yPercent: 0, duration: 0.55, ease: 'expo.out' }, 0.3)
         .fromTo(q('.pt-bar i'), { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: 'power2.inOut' }, 0.25);
     });
@@ -171,7 +172,7 @@
     var pt = $('[data-pt]'); var q = gsap.utils.selector(pt);
     return gsap.timeline({ onComplete: function () { gsap.set(pt, { visibility: 'hidden' }); } })
       .to(q('.pt-label'), { yPercent: -110, duration: 0.4, ease: 'power3.in' }, 0)
-      .to(q('.pt-gear'), { rotation: 90, opacity: 0, duration: 0.4, ease: 'power2.in' }, 0)
+      .to(q('.pt-icon'), { y: -14, opacity: 0, duration: 0.4, ease: 'power2.in' }, 0)
       .to(q('.pt-b'), { yPercent: -100, duration: 0.75, ease: 'expo.inOut' }, 0.1)
       .to(q('.pt-a'), { yPercent: -100, duration: 0.75, ease: 'expo.inOut' }, 0.18);
   }
@@ -397,7 +398,7 @@
   function drawTL(svg) {
     var q = gsap.utils.selector(svg);
     var tl = gsap.timeline({ paused: true });
-    tl.fromTo(q('.part,.pad,.link,.band,.tile,.tile-d,.loop,.loop-in,.idler,.idler-c,.roller,.sprk-wrap,.insert,.bolt,.cbolt,.slotcut,.core'), { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 0)
+    tl.fromTo(q('.part,.pad,.link,.band,.tile,.tile-d,.tile-s,.plate,.screw-r,.screw,.screw-h,.hid,.bsc,.bnut,.chain,.dot,.loop,.loop-in,.idler,.idler-c,.roller,.sprk-wrap,.insert,.bolt,.cbolt,.slotcut,.core'), { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 0)
       .fromTo(q('.lug'), { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.35, stagger: 0.04, ease: 'power2.out' }, 0.1)
       .fromTo(q('.hole,.slot,.clip,.axle,.axle-c'), { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.45, stagger: 0.05, ease: 'back.out(2.2)' }, 0.25)
       .fromTo(q('.guide,.call,.ground'), { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.4)

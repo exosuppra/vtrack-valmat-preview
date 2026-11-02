@@ -9,7 +9,7 @@ VT.config = {
   // À compléter par Valmat (placeholders)
   phone: '00 00 00 00 00',
   phoneHref: '+33000000000',
-  email: 'contact@vtrack-valmat.com',
+  email: 'contact@valmat.eu',
   commitments: [
     { value: 48, unit: 'h', key: 'c1' },
     { value: 48, unit: 'h', key: 'c2' },
@@ -134,18 +134,17 @@ VT.products = [
 /* ---------------------------------------------------------------- textes */
 VT.i18n = {
   fr: {
-    'meta.title': 'V-Track · Chenilles et patins caoutchouc pour engins de chantier',
+    'meta.title': 'Valmat · Chenilles et patins caoutchouc pour engins de chantier',
     'meta.desc': 'Chenilles caoutchouc, pads Roadliner et surpatins pour mini-pelles, pelles, chargeuses compactes et dumpers. Devis sous 48 h ouvrées.',
     skip: 'Aller au contenu',
-    'tb.brand': 'V-Track, une marque <b>Valmat</b>',
-    'tb.sister': 'Découvrez aussi',
+    'tb.brand': '<b>Valmat</b> commercialise la marque V-Track',
     'nav.chenilles': 'Chenilles', 'nav.patins': 'Patins et surpatins', 'nav.identifier': 'Identifier',
     'nav.autres': 'Autres produits', 'nav.stock': 'Stock et promos',
-    'hdr.search': 'Réf., modèle, cote…', 'hdr.quote': 'Demande de devis', 'hdr.menu': 'Menu', 'hdr.call': 'Appeler', 'hdr.by': 'Une marque<br>Valmat',
+    'hdr.search': 'Réf., modèle, cote…', 'hdr.quote': 'Demande de devis', 'hdr.menu': 'Menu', 'hdr.call': 'Appeler',
     'so.label': 'Rechercher vos produits', 'so.ph': 'Référence, modèle ou dimensions',
     'so.try': 'Essayez', 'so.all': 'Voir tous les résultats', 'so.none': 'Aucune référence ne correspond.', 'so.close': 'Fermer',
     'qs.model': 'Par modèle', 'qs.dims': 'Par dimensions', 'qs.brand': 'Marque', 'qs.modelSel': 'Modèle', 'qs.go': 'Rechercher',
-    'qs.type': 'Pièce', 'qs.width': 'Largeur', 'qs.pitch': 'Pas', 'qs.links': 'Maillons',
+    'qs.type': 'Pièce', 'qs.width': 'Largeur', 'qs.pitch': 'Pas', 'qs.links': 'Maillons', 'qs.guide': 'Guidage', 'qs.guideAny': 'Tous',
     'qs.howto': "Comment prendre les cotes d'un patin ?", 'qs.notfound': 'Vous ne trouvez pas votre référence ?', 'qs.contact': 'Contactez-nous',
     'qs.chooseBrand': "Choisissez d'abord la marque", 'qs.allModels': 'Tous les modèles',
     'h.eyebrow': 'Chenilles · Pads · Surpatins',
@@ -165,7 +164,7 @@ VT.i18n = {
     'it.text': "Pas de référence sous la main ? Mesurez les entraxes, toujours de centre de trou à centre de trou. Le guide montre où poser le mètre, patin par patin.",
     'it.s1': 'Mesurez le pas P sur 5 axes, divisez par 4', 'it.s2': 'Relevez les entraxes A, B et C', 'it.s3': 'Notez la largeur L et le diamètre des boulons',
     'it.cta': 'Ouvrir le guide de mesure',
-    'c.eyebrow': 'Nos engagements', 'c.title': 'Ce que V-Track vous garantit',
+    'c.eyebrow': 'Nos engagements', 'c.title': 'Ce que Valmat vous garantit',
     'c.c1': 'Réponse à votre demande, en jours ouvrés', 'c.c2': 'Expédition du stock disponible',
     'c.c3': 'Garantie sur nos chenilles et patins', 'c.c4': 'En stock, prêtes à partir',
     'c.note': 'Valeurs modifiables dans le back-office',
@@ -178,7 +177,7 @@ VT.i18n = {
     'p.add': 'Ajouter au devis', 'p.stock': 'En stock · expédition sous 48 h', 'p.order': 'Sur commande · délai précisé dans le devis',
     'p.price': 'Prix sur demande', 'p.ref': 'Réf.', 'p.photo': 'Photo à venir', 'p.fits': 'Compatible',
     'p.stockQty': 'En stock · {n} disponible · expédition sous 48 h|En stock · {n} disponibles · expédition sous 48 h',
-    'p.pnc': 'Photo non contractuelle', 'p.pncNote': 'Photos non contractuelles', 'p.fitsAsk': 'Compatibilité : nous consulter',
+    'p.pnc': 'Photo non contractuelle', 'p.fitsAsk': 'Compatibilité : nous consulter',
     'e.autre': 'Autre engin', 'sp.gTbc': 'À confirmer sur la chenille en place', 'sp.FG': 'F / G · 3e rangée (YR)',
     'sp.note': 'Variante', 'sp.cls': 'Classe machine indicative',
     'gd.N': 'guide étroit', 'gd.W': 'guide large', 'gd.K': 'profil spécifique', 'gd.Y': 'type Yanmar', 'gd.B': 'guide bloc', 'gd.T': 'guide en T',
@@ -199,7 +198,7 @@ VT.i18n = {
     'pr.related': 'Dans la même famille', 'pr.thBrand': 'Marque', 'pr.thModel': 'Modèle', 'pr.thType': 'Engin', 'pr.thT': 'Tonnage',
     'pr.check': 'Vérifiez vos cotes avant de commander :', 'pr.guide': 'voir le guide de mesure',
     'pr.r1': 'Réponse sous 48 h ouvrées', 'pr.r2': 'Sans création de compte', 'pr.r3': 'Conseil technique au téléphone',
-    'pr.noCross': 'Aucune référence croisée renseignée.', 'pr.drawNote': 'Cotes en millimètres, issues du tableau fournisseur.',
+    'pr.noCross': 'Aucune référence croisée renseignée.',
     'pr.dec': 'Diminuer', 'pr.inc': 'Augmenter',
     'sp.width': 'Largeur', 'sp.pitch': 'Pas', 'sp.links': 'Maillons', 'sp.guide': 'Guidage', 'sp.matter': 'Matière',
     'sp.matterV': 'Caoutchouc, armature acier', 'sp.matterP': 'Caoutchouc, âme acier vulcanisée', 'sp.matterC': 'Caoutchouc, clips acier',
@@ -213,15 +212,15 @@ VT.i18n = {
     'q.title': 'Ma demande de devis', 'q.sub': "Composez votre demande comme un panier. Pas de paiement : nous revenons vers vous avec un prix et un délai.",
     'q.empty': 'Votre demande est vide', 'q.emptyText': 'Ajoutez des chenilles ou des patins depuis le catalogue, ou décrivez votre pièce avec nos guides de mesure.',
     'q.browse': 'Parcourir le catalogue', 'q.guides': 'Ouvrir les guides', 'q.items': 'Pièces demandées', 'q.remove': 'Retirer',
-    'q.custom': 'Pièce sur cotes', 'q.form': 'Vos coordonnées', 'q.machine': 'Votre machine', 'q.summary': 'Récapitulatif',
+    'q.custom': 'Pièce sur cotes', 'q.form': 'Coordonnées de facturation', 'q.ship': 'Adresse de livraison', 'q.shipHint': 'Adresse de livraison nécessaire pour calculer les frais de livraison.', 'q.machine': 'Votre machine', 'q.summary': 'Récapitulatif',
     'q.lines': '{n} ligne|{n} lignes', 'q.units': '{n} pièce|{n} pièces', 'q.lang': 'Réponse en français', 'q.saved': 'Demande conservée sur cet appareil, sans compte',
     'q.step1': 'Panier', 'q.step2': 'Coordonnées', 'q.step3': 'Envoi',
-    'f.company': 'Société', 'f.name': 'Nom et prénom', 'f.email': 'E-mail', 'f.phone': 'Téléphone', 'f.zip': 'Code postal',
+    'f.company': 'Société', 'f.name': 'Nom et prénom', 'f.email': 'E-mail', 'f.phone': 'Téléphone', 'f.zip': 'Code postal', 'f.address': 'Adresse postale', 'f.city': 'Ville', 'f.country': 'Pays', 'f.shipSame': "Livrer à l'adresse de facturation",
     'f.brand': 'Marque de la machine', 'f.model': 'Modèle', 'f.count': 'Nombre de machines', 'f.delay': 'Délai souhaité',
     'f.delay1': 'Urgent, sous 48 h', 'f.delay2': 'Sous une semaine', 'f.delay3': 'Sous un mois', 'f.delay4': 'Pas pressé',
     'f.comment': 'Commentaire', 'f.photos': 'Photos jointes', 'f.photosHint': 'Plaque constructeur, chenille, patin… Glissez vos photos ou cliquez.',
-    'f.rgpd': "J'accepte que V-Track utilise ces informations pour traiter ma demande (<a href=\"{legal}\">politique de confidentialité</a>).",
-    'f.resp': "Je confirme l'exactitude des références et dimensions demandées. J'en suis responsable : V-Track ne pourra être tenu responsable d'une erreur de référence ou de dimension de ma part (voir <a href=\"{legal}\">CGV</a>).",
+    'f.rgpd': "J'accepte que Valmat utilise ces informations pour traiter ma demande (<a href=\"{legal}\">politique de confidentialité</a>).",
+    'f.resp': "Je confirme l'exactitude des références et dimensions demandées. J'en suis responsable : Valmat ne pourra être tenu responsable d'une erreur de référence ou de dimension de ma part (voir <a href=\"{legal}\">CGV</a>).",
     'f.send': 'Envoyer ma demande', 'f.sending': 'Envoi…', 'f.required': 'Champ obligatoire', 'f.invalidEmail': 'Adresse e-mail invalide',
     'f.mustCheck': 'Merci de cocher cette case', 'f.dims': 'Dimensions connues', 'f.message': 'Message', 'f.optional': 'facultatif',
     'f.hp': 'Ne pas remplir ce champ',
@@ -246,8 +245,8 @@ VT.i18n = {
     'g.onMachine': 'Sur la machine', 'g.legend': 'Les lettres du tableau', 'g.designation': 'Désignation dans le tableau',
     'g.pitchTitle': "D'abord, le pas de chaîne (P)", 'g.replay': 'Rejouer',
     'ft.tag': 'Chenilles et patins caoutchouc pour engins de chantier. Demande de prix et de délai en ligne, sans paiement.',
-    'ft.catalog': 'Catalogue', 'ft.help': 'Aide', 'ft.company': 'V-Track',
-    'ft.rights': '© 2026 Valmat · V-Track', 'ft.sister': 'Marques Valmat', 'ft.soon': 'site à venir', 'ft.top': 'Haut de page',
+    'ft.catalog': 'Catalogue', 'ft.help': 'Aide', 'ft.company': 'Valmat',
+    'ft.rights': '© 2026 Valmat', 'ft.sister': 'Nos marques', 'ft.new': 'Nouvelle marque', 'ft.soon': 'à venir', 'ft.top': 'Haut de page',
     'ck.text': "Nous mesurons l'audience du site uniquement avec votre accord.", 'ck.accept': 'Accepter', 'ck.refuse': 'Refuser', 'ck.more': 'En savoir plus',
     'tt.added': 'Ajouté à votre demande', 'tt.view': 'Voir', 'tt.removed': 'Retiré de votre demande', 'tt.custom': 'Pièce sur cotes ajoutée',
     'r.home': 'Accueil', 'r.chenilles': 'Chenilles caoutchouc', 'r.patins': 'Patins et surpatins', 'r.identifier': 'Identifier ma pièce',
@@ -262,18 +261,17 @@ VT.i18n = {
     'nf.text': "Cette page n'existe pas ou a changé d'adresse.", 'nf.back': "Revenir à l'accueil"
   },
   en: {
-    'meta.title': 'V-Track · Rubber tracks and track pads for construction machines',
+    'meta.title': 'Valmat · Rubber tracks and track pads for construction machines',
     'meta.desc': 'Rubber tracks, Roadliner pads and bolt-on or clip-on pads for mini excavators, excavators, compact track loaders and dumpers. Quote within 2 business days.',
     skip: 'Skip to content',
-    'tb.brand': 'V-Track, a <b>Valmat</b> brand',
-    'tb.sister': 'Also by Valmat',
+    'tb.brand': '<b>Valmat</b>, home of the V-Track brand',
     'nav.chenilles': 'Rubber tracks', 'nav.patins': 'Track pads', 'nav.identifier': 'Identify',
     'nav.autres': 'Other products', 'nav.stock': 'Stock & deals',
-    'hdr.search': 'Ref., model, size…', 'hdr.quote': 'Quote request', 'hdr.menu': 'Menu', 'hdr.call': 'Call', 'hdr.by': 'A Valmat<br>brand',
+    'hdr.search': 'Ref., model, size…', 'hdr.quote': 'Quote request', 'hdr.menu': 'Menu', 'hdr.call': 'Call',
     'so.label': 'Search our products', 'so.ph': 'Reference, machine model or size',
     'so.try': 'Try', 'so.all': 'See all results', 'so.none': 'No matching reference.', 'so.close': 'Close',
     'qs.model': 'By model', 'qs.dims': 'By size', 'qs.brand': 'Brand', 'qs.modelSel': 'Model', 'qs.go': 'Search',
-    'qs.type': 'Part', 'qs.width': 'Width', 'qs.pitch': 'Pitch', 'qs.links': 'Links',
+    'qs.type': 'Part', 'qs.width': 'Width', 'qs.pitch': 'Pitch', 'qs.links': 'Links', 'qs.guide': 'Guide', 'qs.guideAny': 'All',
     'qs.howto': 'How to measure a track pad?', 'qs.notfound': "Can't find your reference?", 'qs.contact': 'Contact us',
     'qs.chooseBrand': 'Choose a brand first', 'qs.allModels': 'All models',
     'h.eyebrow': 'Tracks · Pads · Bolt-on & clip-on',
@@ -293,7 +291,7 @@ VT.i18n = {
     'it.text': 'No reference at hand? Measure the hole spacings, always from hole centre to hole centre. The guide shows where to put the tape, pad by pad.',
     'it.s1': 'Measure pitch P over 5 pins, divide by 4', 'it.s2': 'Note hole spacings A, B and C', 'it.s3': 'Note width L and bolt diameter',
     'it.cta': 'Open the measuring guide',
-    'c.eyebrow': 'Our commitments', 'c.title': 'What V-Track guarantees',
+    'c.eyebrow': 'Our commitments', 'c.title': 'What Valmat guarantees',
     'c.c1': 'Reply to your request, in business days', 'c.c2': 'Shipping of stock items',
     'c.c3': 'Warranty on our tracks and pads', 'c.c4': 'In stock, ready to ship',
     'c.note': 'Values editable in the back office',
@@ -306,7 +304,7 @@ VT.i18n = {
     'p.add': 'Add to quote', 'p.stock': 'In stock · ships within 48 h', 'p.order': 'Made to order · lead time in quote',
     'p.price': 'Price on request', 'p.ref': 'Ref.', 'p.photo': 'Photo coming soon', 'p.fits': 'Fits',
     'p.stockQty': 'In stock · {n} available · ships within 48 h|In stock · {n} available · ships within 48 h',
-    'p.pnc': 'Non-contractual photo', 'p.pncNote': 'Photos are non-contractual', 'p.fitsAsk': 'Compatibility: ask us',
+    'p.pnc': 'Non-contractual photo', 'p.fitsAsk': 'Compatibility: ask us',
     'e.autre': 'Other machine', 'sp.gTbc': 'To confirm on the fitted track', 'sp.FG': 'F / G · 3rd row (YR)',
     'sp.note': 'Variant', 'sp.cls': 'Indicative machine class',
     'gd.N': 'narrow guide', 'gd.W': 'wide guide', 'gd.K': 'specific profile', 'gd.Y': 'Yanmar type', 'gd.B': 'block guide', 'gd.T': 'T guide',
@@ -327,7 +325,7 @@ VT.i18n = {
     'pr.related': 'Same family', 'pr.thBrand': 'Brand', 'pr.thModel': 'Model', 'pr.thType': 'Machine', 'pr.thT': 'Weight',
     'pr.check': 'Check your measurements before ordering:', 'pr.guide': 'see the measuring guide',
     'pr.r1': 'Reply within 2 business days', 'pr.r2': 'No account needed', 'pr.r3': 'Technical advice by phone',
-    'pr.noCross': 'No cross reference listed yet.', 'pr.drawNote': 'Dimensions in millimetres, from the supplier table.',
+    'pr.noCross': 'No cross reference listed yet.',
     'pr.dec': 'Decrease', 'pr.inc': 'Increase',
     'sp.width': 'Width', 'sp.pitch': 'Pitch', 'sp.links': 'Links', 'sp.guide': 'Guide type', 'sp.matter': 'Material',
     'sp.matterV': 'Rubber, steel cords', 'sp.matterP': 'Rubber, vulcanised steel core', 'sp.matterC': 'Rubber, steel clips',
@@ -341,15 +339,15 @@ VT.i18n = {
     'q.title': 'My quote request', 'q.sub': 'Build your request like a basket. No payment: we come back to you with a price and a lead time.',
     'q.empty': 'Your request is empty', 'q.emptyText': 'Add tracks or pads from the catalogue, or describe your part with our measuring guides.',
     'q.browse': 'Browse the catalogue', 'q.guides': 'Open the guides', 'q.items': 'Requested parts', 'q.remove': 'Remove',
-    'q.custom': 'Part by measurements', 'q.form': 'Your details', 'q.machine': 'Your machine', 'q.summary': 'Summary',
+    'q.custom': 'Part by measurements', 'q.form': 'Billing details', 'q.ship': 'Delivery address', 'q.shipHint': 'A delivery address is needed to work out the delivery costs.', 'q.machine': 'Your machine', 'q.summary': 'Summary',
     'q.lines': '{n} line|{n} lines', 'q.units': '{n} part|{n} parts', 'q.lang': 'Reply in English', 'q.saved': 'Saved on this device, no account needed',
     'q.step1': 'Basket', 'q.step2': 'Details', 'q.step3': 'Send',
-    'f.company': 'Company', 'f.name': 'Full name', 'f.email': 'Email', 'f.phone': 'Phone', 'f.zip': 'Postcode',
+    'f.company': 'Company', 'f.name': 'Full name', 'f.email': 'Email', 'f.phone': 'Phone', 'f.zip': 'Postcode', 'f.address': 'Postal address', 'f.city': 'City', 'f.country': 'Country', 'f.shipSame': 'Deliver to the billing address',
     'f.brand': 'Machine brand', 'f.model': 'Model', 'f.count': 'Number of machines', 'f.delay': 'Wanted lead time',
     'f.delay1': 'Urgent, within 48 h', 'f.delay2': 'Within a week', 'f.delay3': 'Within a month', 'f.delay4': 'No rush',
     'f.comment': 'Comment', 'f.photos': 'Photos', 'f.photosHint': 'Machine plate, track, pad… Drop your photos or click.',
-    'f.rgpd': 'I agree that V-Track uses this information to handle my request (<a href="{legal}">privacy policy</a>).',
-    'f.resp': 'I confirm the references and sizes requested are correct. I am responsible for them: V-Track cannot be held liable for a reference or size error on my part (see <a href="{legal}">terms of sale</a>).',
+    'f.rgpd': 'I agree that Valmat uses this information to handle my request (<a href="{legal}">privacy policy</a>).',
+    'f.resp': 'I confirm the references and sizes requested are correct. I am responsible for them: Valmat cannot be held liable for a reference or size error on my part (see <a href="{legal}">terms of sale</a>).',
     'f.send': 'Send my request', 'f.sending': 'Sending…', 'f.required': 'Required field', 'f.invalidEmail': 'Invalid email address',
     'f.mustCheck': 'Please tick this box', 'f.dims': 'Known measurements', 'f.message': 'Message', 'f.optional': 'optional',
     'f.hp': 'Leave this field empty',
@@ -374,8 +372,8 @@ VT.i18n = {
     'g.onMachine': 'On the machine', 'g.legend': 'Letters used in the table', 'g.designation': 'Designation in the table',
     'g.pitchTitle': 'First, the chain pitch (P)', 'g.replay': 'Replay',
     'ft.tag': 'Rubber tracks and pads for construction machines. Ask for price and lead time online, no payment.',
-    'ft.catalog': 'Catalogue', 'ft.help': 'Help', 'ft.company': 'V-Track',
-    'ft.rights': '© 2026 Valmat · V-Track', 'ft.sister': 'Valmat brands', 'ft.soon': 'site coming', 'ft.top': 'Back to top',
+    'ft.catalog': 'Catalogue', 'ft.help': 'Help', 'ft.company': 'Valmat',
+    'ft.rights': '© 2026 Valmat', 'ft.sister': 'Our brands', 'ft.new': 'New brand', 'ft.soon': 'coming soon', 'ft.top': 'Back to top',
     'ck.text': 'We only measure site audience with your consent.', 'ck.accept': 'Accept', 'ck.refuse': 'Decline', 'ck.more': 'Learn more',
     'tt.added': 'Added to your request', 'tt.view': 'View', 'tt.removed': 'Removed from your request', 'tt.custom': 'Custom part added',
     'r.home': 'Home', 'r.chenilles': 'Rubber tracks', 'r.patins': 'Track pads', 'r.identifier': 'Identify my part',
@@ -443,7 +441,7 @@ VT.content = {
         clipon: {
           label: 'Surpatin à clipser', short: 'Clip-On',
           lead: 'Se clipse sur la tuile acier. Pas de perçage.',
-          views: ['VUE DE DESSUS, POSÉ SUR LA TUILE', 'COUPE DANS LE SENS DE MARCHE'],
+          views: ['VUE DE DESSUS, POSÉ SUR LA TUILE', 'VUE DE CÔTÉ, PATIN VERS LE HAUT'],
           steps: [
             'Mesurez le <b>pas P</b> et la <b>largeur de la tuile</b>. La largeur de la tuile donne L.',
             "Mesurez l'<b>arête</b> de la tuile : sa largeur (comparée à W1) et sa hauteur (comparée à H1). Elle doit rentrer dans le logement du patin sans jeu ni forçage.",
@@ -451,12 +449,12 @@ VT.content = {
           ],
           legend: [['L', 'Longueur du patin, égale à la largeur de la tuile'], ['W', 'Largeur du patin dans le sens de marche'], ['H', 'Hauteur totale du caoutchouc'], ['W1 / H1', "Largeur et hauteur du logement où vient l'arête de la tuile"]],
           desig: ['CO Pas-Largeur', 'CO 135-400', 'W 110 · H 60 · W1 31 · H1 21 · 3,66 kg · Takeuchi TB260'],
-          note: 'Ce schéma montre le principe. La forme des clips change selon la référence : comparez avec le plan du fournisseur.'
+          note: 'Ce schéma montre le principe. La forme des clips change selon la référence : comparez avec votre patin actuel.'
         },
         bolton: {
           label: 'Surpatin à boulonner', short: 'Bolt-On',
           lead: "Se boulonne sur la tuile acier, qu'on garde. Il faut percer la tuile.",
-          views: ['FACE DU PATIN COLLÉE À LA TUILE', 'COUPE EN TRAVERS DE LA CHENILLE'],
+          views: ['FACE DU PATIN COLLÉE À LA TUILE', 'COUPE DANS LE SENS DE MARCHE'],
           steps: [
             'Mesurez le <b>pas P</b> et la <b>largeur de la tuile</b> acier. Ces deux cotes suffisent pour choisir la référence.',
             'Vérifiez que les têtes des boulons de chaîne tombent dans les <b>lumières</b> du patin. B et C sont les entraxes des deux rangées de boulons, en travers. D et E sont les écarts entre ces rangées, côté droit et côté gauche.',
@@ -464,16 +462,17 @@ VT.content = {
           ],
           legend: [['A', 'Entraxe des 2 trous de fixation du patin'], ['B / C', 'Lumières des boulons de chaîne, rangée haute / basse'], ['D / E', 'Écart entre rangées, côté droit / gauche'], ['L × h × l', "Longueur × hauteur × longueur dans le sens de marche. Ce n'est pas dans le même ordre que pour le Roadliner."]],
           desig: ['BO Pas-Largeur', 'BO 135-400', 'A 300 · B 72 · C 99 · D 46 · E 46 · M12 · 390 × 36 × 106'],
-          note: 'Schéma simplifié : les arêtes de la tuile ne sont pas dessinées. Contrôlez toujours le profil de la tuile (mono ou triple arête) avant de commander.'
+          note: 'Schéma simplifié. Contrôlez toujours le profil de la tuile (mono ou triple arête) avant de commander.'
         }
       },
       labels: { travel: '↑ sens de marche', holes: 'trous de fixation', axis: 'axe de chaîne', ground: 'sol',
         slots: 'lumières : têtes des boulons de chaîne', fix: 'trous de fixation sur la tuile', tile: 'tuile acier', insert: 'insert taraudé',
-        clips: 'clips sur les bords de la tuile', nodrill: 'pas de perçage', rib: "arête de tuile", chainSide: '↑ côté chaîne',
-        flank: 'flanc de la chenille', count: 'nombre de maillons sur la chenille', width: 'largeur', pitch: 'pas' }
+        clips: 'clips sur les bords de la tuile', nodrill: 'pas de perçage', ribHidden: 'arête de tuile (cachée)', chainSide: '↓ côté chaîne',
+        travelDir: 'sens de marche', screws: 'entraxe des vis', padName: 'patin caoutchouc (surpatin)', bolts: 'boulons + écrous',
+        count: 'Nombre de maillons sur la chenille : {n}', width: 'largeur', pitch: 'pas' }
     },
     faq: [
-      ['Comment connaître la taille de ma chenille ?', "Regardez le flanc de la chenille : la taille y est souvent moulée, sous la forme largeur × pas × maillons (par exemple 400 × 72,5 × 74). Si le marquage est effacé, notre guide « Taille de chenille » montre comment mesurer chaque cote."],
+      ['Comment connaître la taille de ma chenille ?', "Regardez le flanc de la chenille : la taille y est souvent moulée, sous la forme largeur × pas × maillons (par exemple 400 × 72,5W × 74). Si le marquage est effacé, notre guide « Taille de chenille » montre comment mesurer chaque cote."],
       ['Quelle différence entre un pad Roadliner, un surpatin à clipser et un surpatin à boulonner ?', "Le pad Roadliner remplace la tuile acier et se boulonne directement sur la chaîne. Le surpatin à boulonner se fixe sur la tuile acier, qu'il faut percer. Le surpatin à clipser se clipse sur la tuile acier, sans perçage."],
       ['Quelle chenille pour une Kubota KX057 ?', "La Kubota KX057-4 utilise une chenille 400 × 72,5W × 74. Vérifiez toujours le marquage de votre chenille actuelle, ou cherchez votre machine dans l'onglet « Par modèle »."],
       ['Sous quel délai vais-je recevoir mon devis ?', "Nous répondons à chaque demande sous 48 h ouvrées, avec un prix et un délai. Les références en stock partent sous 48 h après confirmation."],
@@ -482,10 +481,10 @@ VT.content = {
       ['Qui est responsable de la référence commandée ?', "Avant l'envoi, vous confirmez l'exactitude des références et dimensions demandées. En cas de doute, appelez-nous : on vérifie avec vous."]
     ],
     about: {
-      title: 'V-Track, la marque chenilles et patins de Valmat',
-      lead: "V-Track réunit les chenilles caoutchouc, les pads Roadliner et les surpatins de Valmat pour les engins de chantier : mini-pelles, pelles, chargeuses compactes et dumpers.",
+      title: 'Valmat, chenilles et patins pour engins de chantier',
+      lead: "Valmat commercialise ses marques pour les engins de chantier : V-Track pour les chenilles caoutchouc, les pads Roadliner et les surpatins, et une nouvelle marque à venir pour les autres produits.",
       blocks: [
-        ['Qui', "V-Track est une marque de Valmat. Valmat développe aussi V-Tilt et V-Drill."],
+        ['Qui', "Valmat est la société qui commercialise la marque V-Track, et bientôt une seconde marque, en cours de création."],
         ['Où', 'Valmat · ville et région à compléter. Expédition dans toute la France.'],
         ['Spécialité', "Les pièces d'usure des trains de chenilles : chenilles caoutchouc, pads Roadliner, surpatins à clipser et à boulonner. Et un conseil technique pour trouver la bonne référence du premier coup."]
       ],
@@ -495,7 +494,7 @@ VT.content = {
       ['Mentions légales', "Éditeur : Valmat (raison sociale, adresse, SIRET et directeur de la publication à compléter). Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France."],
       ['Confidentialité', "Les informations envoyées par les formulaires servent uniquement à traiter votre demande de devis ou de renseignement. Durée de conservation et droits d'accès, de rectification et de suppression : à préciser par Valmat."],
       ['Cookies', "La mesure d'audience n'est activée qu'avec votre accord, donné dans le bandeau cookies. Vous pouvez changer d'avis à tout moment."],
-      ['Conditions générales de vente', "Le client est responsable des références et dimensions qu'il commande. V-Track ne peut être tenu responsable d'une erreur de référence ou de dimension de sa part. Texte complet à faire valider par un juriste."]
+      ['Conditions générales de vente', "Le client est responsable des références et dimensions qu'il commande. Valmat ne peut être tenu responsable d'une erreur de référence ou de dimension de sa part. Texte complet à faire valider par un juriste."]
     ]
   },
   en: {
@@ -548,7 +547,7 @@ VT.content = {
         clipon: {
           label: 'Clip-on pad', short: 'Clip-On',
           lead: 'Clips onto the steel shoe. No drilling.',
-          views: ['TOP VIEW, ON THE SHOE', 'SECTION IN TRAVEL DIRECTION'],
+          views: ['TOP VIEW, ON THE SHOE', 'SIDE VIEW, PAD FACING UP'],
           steps: [
             'Measure <b>pitch P</b> and <b>shoe width</b>. The shoe width gives L.',
             'Measure the shoe <b>grouser</b>: its width (vs W1) and height (vs H1). It must sit in the pad slot without play or forcing.',
@@ -556,12 +555,12 @@ VT.content = {
           ],
           legend: [['L', 'Pad length, equal to the shoe width'], ['W', 'Pad width in travel direction'], ['H', 'Total rubber height'], ['W1 / H1', 'Width and height of the grouser slot']],
           desig: ['CO Pitch-Width', 'CO 135-400', 'W 110 · H 60 · W1 31 · H1 21 · 3.66 kg · Takeuchi TB260'],
-          note: "This drawing shows the principle. Clip shape varies by reference: compare with the supplier's drawing."
+          note: "This drawing shows the principle. Clip shape varies by reference: compare with your current pad."
         },
         bolton: {
           label: 'Bolt-on pad', short: 'Bolt-On',
           lead: 'Bolts onto the steel shoe, which you keep. The shoe must be drilled.',
-          views: ['PAD FACE AGAINST THE SHOE', 'SECTION ACROSS THE TRACK'],
+          views: ['PAD FACE AGAINST THE SHOE', 'SECTION IN TRAVEL DIRECTION'],
           steps: [
             'Measure <b>pitch P</b> and the steel <b>shoe width</b>. These two values are enough to pick the reference.',
             'Check that the chain bolt heads fall into the pad <b>slots</b>. B and C are the spacings of the two bolt rows, across. D and E are the distances between these rows, right and left side.',
@@ -569,16 +568,17 @@ VT.content = {
           ],
           legend: [['A', 'Spacing of the 2 pad fixing holes'], ['B / C', 'Chain bolt slots, top / bottom row'], ['D / E', 'Row spacing, right / left'], ['L × h × l', 'Length × height × length in travel direction. Not the same order as the Roadliner.']],
           desig: ['BO Pitch-Width', 'BO 135-400', 'A 300 · B 72 · C 99 · D 46 · E 46 · M12 · 390 × 36 × 106'],
-          note: 'Simplified drawing: shoe grousers are not shown. Always check the shoe profile (single or triple grouser) before ordering.'
+          note: 'Simplified drawing. Always check the shoe profile (single or triple grouser) before ordering.'
         }
       },
       labels: { travel: '↑ travel direction', holes: 'fixing holes', axis: 'chain pin', ground: 'ground',
         slots: 'slots: chain bolt heads', fix: 'fixing holes on the shoe', tile: 'steel shoe', insert: 'threaded insert',
-        clips: 'clips on the shoe edges', nodrill: 'no drilling', rib: 'shoe grouser', chainSide: '↑ chain side',
-        flank: 'track side', count: 'number of links on the track', width: 'width', pitch: 'pitch' }
+        clips: 'clips on the shoe edges', nodrill: 'no drilling', ribHidden: 'shoe grouser (hidden)', chainSide: '↓ chain side',
+        travelDir: 'travel direction', screws: 'screw spacing', padName: 'rubber pad', bolts: 'bolts + nuts',
+        count: 'Number of links on the track: {n}', width: 'width', pitch: 'pitch' }
     },
     faq: [
-      ['How do I find my track size?', 'Look at the side of the track: the size is often moulded there as width × pitch × links (for example 400 × 72.5 × 74). If the marking is worn, our “Track size” guide shows how to measure each value.'],
+      ['How do I find my track size?', 'Look at the side of the track: the size is often moulded there as width × pitch × links (for example 400 × 72.5W × 74). If the marking is worn, our “Track size” guide shows how to measure each value.'],
       ['What is the difference between a Roadliner pad, a clip-on pad and a bolt-on pad?', 'A Roadliner pad replaces the steel shoe and bolts directly onto the chain. A bolt-on pad is fixed onto the steel shoe, which must be drilled. A clip-on pad clips onto the steel shoe, with no drilling.'],
       ['Which track fits a Kubota KX057?', 'The Kubota KX057-4 uses a 400 × 72.5W × 74 track. Always check the marking on your current track, or find your machine in the “By model” tab.'],
       ['How fast will I get my quote?', 'We reply to every request within 2 business days, with a price and a lead time. Stock items ship within 48 h after confirmation.'],
@@ -587,10 +587,10 @@ VT.content = {
       ['Who is responsible for the ordered reference?', 'Before sending, you confirm the references and sizes requested are correct. If in doubt, call us: we check with you.']
     ],
     about: {
-      title: "V-Track, Valmat's tracks and pads brand",
-      lead: "V-Track brings together Valmat's rubber tracks, Roadliner pads and bolt-on or clip-on pads for construction machines: mini excavators, excavators, compact track loaders and dumpers.",
+      title: 'Valmat, tracks and pads for construction machines',
+      lead: 'Valmat sells its own brands for construction machines: V-Track for rubber tracks, Roadliner pads and bolt-on or clip-on pads, and a new brand coming soon for other products.',
       blocks: [
-        ['Who', 'V-Track is a Valmat brand. Valmat also develops V-Tilt and V-Drill.'],
+        ['Who', 'Valmat is the company behind the V-Track brand, with a second brand currently being created.'],
         ['Where', 'Valmat · city and region to be added. Shipping across France.'],
         ['Speciality', 'Undercarriage wear parts: rubber tracks, Roadliner pads, clip-on and bolt-on pads. And technical advice to find the right reference first time.']
       ],
@@ -600,7 +600,7 @@ VT.content = {
       ['Legal notice', 'Publisher: Valmat (company name, address, registration number and publication director to be added). Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France.'],
       ['Privacy', 'Information sent through the forms is only used to handle your quote request or enquiry. Retention period and your rights of access, correction and deletion: to be specified by Valmat.'],
       ['Cookies', 'Audience measurement is only enabled with your consent, given in the cookie banner. You can change your mind at any time.'],
-      ['Terms of sale', 'The customer is responsible for the references and sizes ordered. V-Track cannot be held liable for a reference or size error on their part. Full text to be validated by a lawyer.']
+      ['Terms of sale', 'The customer is responsible for the references and sizes ordered. Valmat cannot be held liable for a reference or size error on their part. Full text to be validated by a lawyer.']
     ]
   }
 };

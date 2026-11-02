@@ -157,7 +157,7 @@
   function imgSrc(f) { return !f ? '' : (f.indexOf('/') > -1 ? f : 'assets/img/' + f); }
   // Image d'un emplacement du site : celle du back-office, sinon l'image d'origine
   function siteImg(slot, fallback) { return esc((VT.images && VT.images[slot]) || (fallback ? imgSrc(fallback) : '')); }
-  // Mention demandée par Valmat sous chaque photo de produit
+  // Mention demandée par Valmat, sur les photos des fiches produits uniquement
   function pnc() { return '<span class="pnc">' + t('p.pnc') + '</span>'; }
   // Sans photo : visuel de la référence (sculpture de chenille + cote), en attendant les photos de Valentin
   function phVisual(p) {
@@ -166,7 +166,7 @@
       '<span class="ph-dim">' + esc(lab) + '</span><span class="ph-note">' + t('p.photo') + '</span></div>';
   }
   function pimg(p, cls) {
-    if (p.img) return '<img src="' + esc(imgSrc(p.img)) + '" alt="' + esc(pname(p)) + '" loading="lazy" decoding="async" class="' + (cls || '') + '">' + pnc();
+    if (p.img) return '<img src="' + esc(imgSrc(p.img)) + '" alt="' + esc(pname(p)) + '" loading="lazy" decoding="async" class="' + (cls || '') + '">';
     return phVisual(p);
   }
   function badge(p) {
@@ -236,6 +236,9 @@
       var hit = qn.filter(function (n) { return h.dims.some(function (d) { return near(d, n); }); }).length;
       if (hit === qn.length) sc += 12 * hit; else if (hit >= 2) sc += 4 * hit;
     }
+    // 400x72,5Wx74 : la lettre tapée après le pas passe devant les autres guidages
+    var letter = p.type === 'chenille' && qn.length >= 2 && norm(q).match(/\d\s*([a-wyz]{1,3})(?=\s*(?:[x×*]|\s|$))/);
+    if (letter) sc += p.dims.g && p.dims.g.toLowerCase() === letter[1] ? 8 : (p.dims.g ? -8 : 0);
     var whole = key(q);
     if (whole.length >= 3 && h.keys.some(function (k) { return k.indexOf(whole) > -1; })) sc += 10;
     norm(q).split(/[\s/]+/).filter(function (w) { return w.length >= 2; }).forEach(function (w) {
@@ -266,13 +269,13 @@
       return mk.indexOf(k) > -1 || mo.indexOf(k) > -1 || (k.length >= 4 && lev(k, key(m.brand)) <= 1);
     }).slice(0, 4);
   }
-  function searchDims(type, w, p, l) {
+  function searchDims(type, w, p, l, g) {
     var W = parseFloat(String(w).replace(',', '.')), Pp = parseFloat(String(p).replace(',', '.')), Ll = parseFloat(String(l).replace(',', '.'));
     return VT.products.filter(function (x) {
       if (!x.dims) return false;
       if (type === 'chenille') {
         if (x.type !== 'chenille') return false;
-        return (isNaN(W) || near(x.dims.w, W)) && (isNaN(Pp) || near(x.dims.p, Pp)) && (isNaN(Ll) || near(x.dims.l, Ll));
+        return (isNaN(W) || near(x.dims.w, W)) && (isNaN(Pp) || near(x.dims.p, Pp)) && (isNaN(Ll) || near(x.dims.l, Ll)) && (!g || x.dims.g === g);
       }
       if (PAD_TYPES.indexOf(x.type) < 0) return false;
       if (type && type !== 'patins' && x.type !== type) return false;
@@ -337,7 +340,7 @@
     return '<g class="dim" data-dim="' + k + '">' + ext +
       '<line class="dl" x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '" pathLength="1"/>' +
       '<path class="ah" d="M' + x1 + ' ' + y + 'l7 -3.5v7z"/><path class="ah" d="M' + x2 + ' ' + y + 'l-7 -3.5v7z"/>' +
-      '<text class="dt" x="' + ((x1 + x2) / 2) + '" y="' + (y - 7) + '" text-anchor="middle">' + (o.label || k) + ' = <tspan data-v="' + k + '">' + num(v) + '</tspan>' + (o.suffix || '') + '</text></g>';
+      '<text class="dt" x="' + ((x1 + x2) / 2) + '" y="' + (y - 7) + '" text-anchor="middle">' + (o.plain || (o.label || k) + ' = <tspan data-v="' + k + '">' + num(v) + '</tspan>' + (o.suffix || '')) + '</text></g>';
   }
   function dimV(x, y1, y2, k, v, o) {
     o = o || {};
@@ -400,45 +403,50 @@
         'Bolt-On, ' + L.slots);
     },
     boltSection: function (d, L) {
-      return svgWrap('0 0 560 220',
-        '<rect class="tile" x="40" y="86" width="480" height="10"/>' +
-        '<rect class="pad" x="56" y="96" width="448" height="48" rx="5"/>' +
-        '<rect class="insert" x="82" y="98" width="12" height="26"/><rect class="insert" x="446" y="98" width="12" height="26"/>' +
-        '<rect class="bolt" x="78" y="78" width="20" height="8"/><rect class="bolt" x="442" y="78" width="20" height="8"/>' +
-        '<rect class="slotcut" x="240" y="96" width="34" height="16" rx="3"/><rect class="slotcut" x="286" y="96" width="34" height="16" rx="3"/>' +
-        '<rect class="cbolt" x="244" y="44" width="26" height="62" rx="4"/><rect class="cbolt" x="290" y="44" width="26" height="62" rx="4"/>' +
-        '<text class="lbl" x="104" y="80">' + L.tile + '</text>' +
-        '<text class="lbl" x="104" y="164">' + L.insert + '</text>' +
-        dimH(88, 452, 24, 'A', d.A, { ext: [[88, 30, 88, 76], [452, 30, 452, 76]] }) +
-        dimH(56, 504, 194, 'L', d.L, { ext: [[56, 146, 56, 200], [504, 146, 504, 200]] }) +
-        dimV(526, 96, 144, 'h', d.h, { side: 'r', ext: [[506, 96, 532, 96], [506, 144, 532, 144]] }),
+      var bolt = function (x) { return '<rect class="bsc" x="' + (x - 9) + '" y="239" width="18" height="168"/><rect class="bnut" x="' + (x - 31) + '" y="357" width="63" height="32" rx="3"/>'; };
+      return svgWrap('0 0 560 262',
+        '<g transform="translate(68 60) scale(.62) translate(-137 -148)">' +
+        '<path class="tile-s" d="M137 357V245L158 221H187L201 293H433L449 244H505L523 293H755L769 221H800L819 245V357Z"/>' +
+        '<path class="pad" d="M197 168Q197 148 217 148H740Q760 148 760 168V210L747 224V284H527V226H429V284H210V224L197 210Z"/>' +
+        bolt(319) + bolt(637) + '</g>' +
+        '<text class="lbl lbl-c" x="280" y="92" text-anchor="middle">' + L.padName + '</text>' +
+        '<path class="call" d="M88 190V228"/><text class="lbl" x="60" y="246">' + L.tile + '</text>' +
+        '<path class="call" d="M378 222V228"/><text class="lbl" x="378" y="246" text-anchor="middle">' + L.bolts + '</text>' +
+        dimH(105, 454, 44, 'l', d.l, { ext: [[105, 38, 105, 58], [454, 38, 454, 58]] }) +
+        dimV(520, 60, 144, 'h', d.h, { side: 'r', ext: [[456, 60, 526, 60], [456, 144, 526, 144]] }),
         'Bolt-On, ' + L.tile);
     },
     clipTop: function (d, L) {
-      var clip = function (x) { return '<rect class="clip" x="' + x + '" y="46" width="36" height="146" rx="3"/>'; };
+      var clip = function (x) { return '<rect class="clip" x="' + x + '" y="52" width="37" height="134" rx="3"/>'; };
       return svgWrap('0 0 560 260',
         '<rect class="tile-d" x="48" y="44" width="444" height="150" rx="6"/>' +
-        '<rect class="part" x="60" y="56" width="420" height="126" rx="10"/>' +
-        clip(60) + clip(444) +
+        '<rect class="part" x="75" y="56" width="390" height="126"/>' +
+        clip(55) + clip(448) +
         '<text class="lbl lbl-c" x="270" y="124" text-anchor="middle">' + L.nodrill + '</text>' +
-        '<path class="call" d="M462 50L444 26H330"/><text class="lbl" x="330" y="20">' + L.clips + '</text>' +
-        dimH(60, 480, 228, 'L', d.L, { ext: [[60, 194, 60, 234], [480, 194, 480, 234]] }) +
-        dimV(516, 56, 182, 'W', d.W, { side: 'r', ext: [[482, 56, 522, 56], [482, 182, 522, 182]] }),
+        '<path class="call" d="M466 52L448 26H330"/><text class="lbl" x="330" y="20">' + L.clips + '</text>' +
+        dimH(60, 480, 228, 'L', d.L, { ext: [[60, 188, 60, 234], [480, 188, 480, 234]] }) +
+        dimV(516, 56, 182, 'W', d.W, { side: 'r', ext: [[487, 56, 522, 56], [487, 182, 522, 182]] }),
         'Clip-On, ' + L.nodrill);
     },
     clipSection: function (d, L) {
-      return svgWrap('0 0 560 240',
-        '<text class="lbl" x="20" y="20">' + L.chainSide + '</text>' +
-        '<rect class="tile" x="150" y="52" width="260" height="12"/><path class="tile" d="M262 64h36l-4 24h-28z"/>' +
-        '<path class="pad" d="M170 64H260V92H300V64H390V150a6 6 0 0 1-6 6H176a6 6 0 0 1-6-6Z"/>' +
-        '<path class="clip" d="M150 44h22v8h-14v20h-8z"/><path class="clip" d="M410 44h-22v8h14v20h8z"/>' +
-        '<path class="call" d="M150 58H106"/><text class="lbl" x="22" y="63">' + L.tile + '</text>' +
-        '<path class="call" d="M284 78L318 30H340"/><text class="lbl" x="344" y="34">' + L.rib + '</text>' +
-        dimH(170, 390, 210, 'W', d.W, { ext: [[170, 158, 170, 216], [390, 158, 390, 216]] }) +
-        dimH(260, 300, 182, 'W1', d.W1, { ext: [[260, 94, 260, 188], [300, 94, 300, 188]] }) +
-        dimV(432, 64, 156, 'H', d.H, { side: 'r', ext: [[392, 64, 438, 64], [392, 156, 438, 156]] }) +
-        dimV(130, 64, 92, 'H1', d.H1, { ext: [[168, 64, 124, 64], [258, 92, 124, 92]] }),
-        'Clip-On, ' + L.rib);
+      var screw = function (x) {
+        return '<circle class="screw-r" cx="' + x + '" cy="345" r="40"/><circle class="screw" cx="' + x + '" cy="345" r="32"/>' +
+          '<path class="screw-h" d="M' + (x - 26) + ' 345L' + (x - 13) + ' 322.5H' + (x + 13) + 'L' + (x + 26) + ' 345L' + (x + 13) + ' 367.5H' + (x - 13) + 'Z"/>';
+      };
+      return svgWrap('0 0 560 350',
+        '<g transform="translate(130 70) scale(.709) translate(-308 -218)">' +
+        '<rect class="pad" x="308" y="218" width="423" height="195" rx="16"/>' +
+        '<rect class="plate" x="300" y="413" width="440" height="33"/>' +
+        '<rect class="plate" x="370" y="270" width="299" height="192" rx="12"/>' +
+        '<path class="hid" d="M469 410V345H571V410"/>' +
+        screw(429) + screw(611) + '</g>' +
+        '<path class="call" d="M132 219L70 262"/><text class="lbl" x="20" y="280">' + L.tile + '</text>' +
+        '<circle class="dot" cx="280" cy="185" r="2.5"/><path class="call" d="M280 185L258 306"/><text class="lbl" x="254" y="312" text-anchor="end">' + L.ribHidden + '</text>' +
+        '<text class="lbl" x="36" y="334">' + L.chainSide + '</text><rect class="chain" x="20" y="340" width="520" height="6"/>' +
+        dimH(130, 430, 34, 'W', d.W, { suffix: ' (' + L.travelDir + ')', ext: [[130, 40, 130, 66], [430, 40, 430, 66]] }) +
+        dimV(96, 70, 208, 'H', d.H, { ext: [[128, 70, 90, 70], [128, 208, 90, 208]] }) +
+        dimH(216, 345, 270, 'S', 0, { plain: L.screws, ext: [[216, 190, 216, 276], [345, 190, 345, 276]] }),
+        'Clip-On, ' + L.ribHidden);
     },
     trackTop: function (d, L) {
       var lugs = '', ticks = '', i;
@@ -450,8 +458,8 @@
       return svgWrap('0 0 560 260',
         '<rect class="band" x="40" y="60" width="480" height="130" rx="4"/>' + lugs + ticks +
         dimV(22, 60, 190, 'W', d.w, { ext: [[38, 60, 16, 60], [38, 190, 16, 190]] }) +
-        dimH(172, 232, 38, 'P', d.p, { ext: [[172, 44, 172, 62], [232, 44, 232, 62]] }) +
-        '<text class="dt" x="290" y="240" text-anchor="middle"><tspan data-v="N">' + d.l + '</tspan> = ' + L.count + '</text>',
+        dimH(172, 232, 38, 'P', d.p, { suffix: '<tspan data-v="G">' + (d.g || '') + '</tspan>', ext: [[172, 44, 172, 62], [232, 44, 232, 62]] }) +
+        '<text class="dt" x="290" y="240" text-anchor="middle">' + L.count.replace('{n}', '<tspan data-v="N">' + d.l + '</tspan>') + '</text>',
         'Track, ' + L.width);
     },
     trackFlank: function (d, L) {
@@ -462,9 +470,8 @@
         '<g class="sprk-wrap" transform="translate(430 105)"><g class="sprk"><path transform="scale(.27) translate(-222 -297)" fill-rule="evenodd" d="' + g + '"/></g></g>' +
         '<circle class="idler" cx="130" cy="105" r="36"/><circle class="idler-c" cx="130" cy="105" r="8"/>' +
         [205, 265, 325].map(function (x) { return '<circle class="roller" cx="' + x + '" cy="140" r="9"/>'; }).join('') +
-        '<text class="mark" x="282" y="103" text-anchor="middle"><tspan data-v="W">' + num(d.w) + '</tspan> × <tspan data-v="P">' + num(d.p) + '</tspan><tspan data-v="G">' + (d.g || '') + '</tspan> × <tspan data-v="N">' + d.l + '</tspan></text>' +
-        '<text class="lbl" x="282" y="200" text-anchor="middle">' + L.flank + '</text>',
-        'Track, ' + L.flank, ' data-loop');
+        '<text class="mark" x="282" y="30" text-anchor="middle"><tspan data-v="W">' + num(d.w) + '</tspan> × <tspan data-v="P">' + num(d.p) + '</tspan><tspan data-v="G">' + (d.g || '') + '</tspan> × <tspan data-v="N">' + d.l + '</tspan></text>',
+        'Track', ' data-loop');
     },
     pitch: function () {
       var axes = [70, 190, 310, 430, 550], br = '', i;
@@ -523,6 +530,8 @@
       '<label class="fld"><span>' + t('qs.width') + '</span><input name="w" inputmode="decimal" autocomplete="off" placeholder="400" value="' + esc(pre.w || '') + '"></label>' +
       '<label class="fld"><span>' + t('qs.pitch') + '</span><input name="p" inputmode="decimal" autocomplete="off" placeholder="' + (isPad ? '135' : num(72.5)) + '" value="' + esc(pre.p || '') + '"></label>' +
       '<label class="fld" data-links' + (isPad ? ' hidden' : '') + '><span>' + t('qs.links') + '</span><input name="l" inputmode="numeric" autocomplete="off" placeholder="74" value="' + esc(pre.l || '') + '"></label>' +
+      '<label class="fld" data-links' + (isPad ? ' hidden' : '') + '><span>' + t('qs.guide') + '</span><select name="g" aria-label="' + t('qs.guide') + '"><option value="">' + t('qs.guideAny') + '</option>' +
+      uniq(VT.products.map(function (x) { return x.type === 'chenille' ? x.dims.g : ''; }).filter(Boolean)).sort().map(function (g) { return '<option' + (pre.g === g ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>' +
       '<button class="btn btn-o qs-go" type="submit" data-magnetic><span>' + t('qs.go') + '</span></button></form>' +
       '</div>';
   }
@@ -560,14 +569,14 @@
       var ts = $('select[name="type"]', df);
       ts.addEventListener('change', function () {
         var pad = ts.value !== 'chenille';
-        $('[data-links]', df).hidden = pad;
+        $$('[data-links]', df).forEach(function (el) { el.hidden = pad; });
         $('input[name="p"]', df).placeholder = pad ? '135' : num(72.5);
       });
       df.addEventListener('submit', function (e) {
         e.preventDefault();
         var f = new FormData(df);
         if (!f.get('w') && !f.get('p') && !f.get('l')) { $('input[name="w"]', df).focus(); if (window.Motion) Motion.shake($('input[name="w"]', df).parentNode); return; }
-        location.hash = href('search', null, { type: f.get('type'), w: f.get('w'), p: f.get('p'), l: ts.value === 'chenille' ? f.get('l') : '' });
+        location.hash = href('search', null, { type: f.get('type'), w: f.get('w'), p: f.get('p'), l: ts.value === 'chenille' ? f.get('l') : '', g: ts.value === 'chenille' ? f.get('g') : '' });
       });
     });
   }
@@ -718,7 +727,7 @@
         '<p class="sec-lead" data-reveal>' + t(hasStock ? 'h.stockText' : 'h.selText') + '</p></div>' +
         '<div class="hs-viewport"><div class="hs-track" data-skew>' + stock.map(function (p) { return card(p, { reveal: false }); }).join('') +
         '<a class="hs-more" href="' + allLink + '"><span class="hs-more-in"><b>' + t(hasStock ? 'h.stockAll' : 'h.selAll') + '</b><i aria-hidden="true">→</i></span></a></div></div>' +
-        '<div class="wrap stock-foot"><a class="link-o" href="' + allLink + '">' + t(hasStock ? 'h.stockAll' : 'h.selAll') + ' <span aria-hidden="true">→</span></a><span class="mono-note">' + t('p.pncNote') + '</span></div>' +
+        '<div class="wrap stock-foot"><a class="link-o" href="' + allLink + '">' + t(hasStock ? 'h.stockAll' : 'h.selAll') + ' <span aria-hidden="true">→</span></a></div>' +
         '</section>' +
 
         '<section class="sec doors-sec" aria-labelledby="doors-t"><div class="wrap">' +
@@ -726,7 +735,6 @@
         '<div class="doors">' + doors.map(function (d, i) {
           return '<a class="door" href="' + d[5] + '" data-reveal="door" data-tilt>' +
             '<span class="door-media">' + (d[1] ? '<img src="' + d[1] + '" alt="" loading="lazy">' : '<span class="ph ph-door"><span>' + t('p.photo') + ' · ' + t('d.autres.s') + '</span></span>') + '</span>' +
-            (d[1] ? pnc() : '') +
             '<span class="door-n mono">0' + (i + 1) + '</span>' +
             '<span class="door-body"><span class="door-t">' + d[2] + '</span><span class="door-s">' + d[3] + '</span><span class="door-c">' + d[4] + ' <i aria-hidden="true">→</i></span></span>' +
             '<span class="door-line" aria-hidden="true"></span></a>';
@@ -782,9 +790,10 @@
             '<div class="btn-row"><a class="btn btn-o" href="' + href('chenilles') + '"><span>' + t('r.chenilles') + '</span></a><a class="btn btn-line" href="' + href('patins') + '"><span>' + t('r.patins') + '</span></a></div></div>';
         return '<section class="pg-hero cat-hero"><div class="pg-hero-media" aria-hidden="true"><img src="' + siteImg('cat-' + id, c.img) + '" alt="" data-parallax="0.12"></div>' +
           '<div class="wrap">' + crumbs([[t('r.' + id)]]) +
+          (id === 'chenilles' || id === 'patins' ? '<div class="brand-mark" data-reveal="fade">' + logoSVG('vtrack') + '</div>' : '') +
           '<h1 class="pg-title" data-split>' + t('r.' + id) + '</h1><p class="pg-lead" data-reveal>' + c.intro + '</p>' +
           (id === 'stock' ? '' : '<div class="cat-qs" data-reveal>' + quickSearch({ tab: id === 'patins' ? 'dims' : 'model', type: id === 'patins' ? 'patins' : 'chenille' }) + '</div>') +
-          '</div>' + (id === 'autres' ? '' : pnc()) + '<i class="pg-line" aria-hidden="true"></i></section>' +
+          '</div><i class="pg-line" aria-hidden="true"></i></section>' +
           '<section class="sec sec-tight"><div class="wrap">' + body + notFoundLine() +
           '</div></section>' + commitments(true) + ctaBlock();
       },
@@ -861,7 +870,7 @@
         '<div class="pr-grid">' +
         '<div class="pr-media" data-reveal="clip">' +
         (draws.length ? '<div class="seg" role="tablist"><button type="button" role="tab" aria-selected="true" data-pv="photo">' + t('pr.photo') + '</button><button type="button" role="tab" aria-selected="false" data-pv="draw">' + t('pr.drawing') + '</button></div>' : '') +
-        '<div class="pr-photo" data-pv-panel="photo">' + pimg(p) + badge(p) + '</div>' +
+        '<div class="pr-photo" data-pv-panel="photo">' + pimg(p) + (p.img ? pnc() : '') + badge(p) + '</div>' +
         (p.imgs && p.imgs.length > 1 ? '<div class="pr-thumbs" data-pv-panel="photo">' + p.imgs.map(function (f, i) {
           return '<button type="button" data-thumb="' + esc(imgSrc(f)) + '" aria-pressed="' + (i === 0) + '" aria-label="' + t('pr.photo') + ' ' + (i + 1) + '"><img src="' + esc(imgSrc(f)) + '" alt="" loading="lazy"></button>';
         }).join('') + '</div>' : '') +
@@ -883,7 +892,7 @@
         (guideTab ? '<p class="pr-check" data-reveal="fade">' + t('pr.check') + ' <a class="link-o" href="' + href('identifier', guideTab) + '">' + t('pr.guide') + ' →</a></p>' : '') +
         '</div></div></div></section>' +
 
-        (draws.length ? '<section class="sec sec-dark"><div class="wrap"><div class="sec-head sec-head-row"><div>' + eyebrow(t('pr.drawing')) + '<h2 class="h2" data-split>' + esc(p.desig || p.ref) + '</h2></div><p class="mono-note" data-reveal="fade">' + t('pr.drawNote') + '</p></div>' +
+        (draws.length ? '<section class="sec sec-dark"><div class="wrap"><div class="sec-head sec-head-row"><div>' + eyebrow(t('pr.drawing')) + '<h2 class="h2" data-split>' + esc(p.desig || p.ref) + '</h2></div></div>' +
           '<div class="draw-pair">' + draws.map(function (svg, i) { return '<figure class="sheet-fig" data-reveal><figcaption class="sheet-tag mono">' + (C().guide.tabs[guideTab] ? C().guide.tabs[guideTab].views[i] : '') + '</figcaption>' + svg + '</figure>'; }).join('') + '</div></div></section>' : '') +
 
         '<section class="sec"><div class="wrap pr-tables">' +
@@ -931,7 +940,7 @@
         });
       });
       setLd({
-        '@context': 'https://schema.org', '@type': 'Product', name: pname(p), sku: p.ref, brand: { '@type': 'Brand', name: 'V-Track' },
+        '@context': 'https://schema.org', '@type': 'Product', name: pname(p), sku: p.ref, brand: { '@type': 'Brand', name: FAMILY[p.type] === 'autres' ? 'Valmat' : 'V-Track' },
         category: t('ty.' + p.type), image: p.img ? imgSrc(p.img) : undefined,
         additionalProperty: specRows(p).map(function (row) { return { '@type': 'PropertyValue', name: row[0], value: String(row[1]) }; }),
         isAccessoryOrSparePartFor: machinesOf(p).map(function (m) { return { '@type': 'Product', name: m.brand + ' ' + m.model }; })
@@ -948,9 +957,9 @@
       res.title = t('s.machine') + ' ' + esc(m ? m.brand + ' ' + m.model : q.brand); res.pre = { brand: q.brand, model: q.model };
       if (m) res.sub = t('e.' + m.type) + (m.t != null ? ' · ' + num(m.t) + ' t' : '');
     } else if (q.w || q.p || q.l) {
-      res.list = searchDims(q.type || 'chenille', q.w, q.p, q.l);
-      res.title = t('s.dims'); res.pre = { tab: 'dims', type: q.type, w: q.w, p: q.p, l: q.l };
-      res.sub = [q.type === 'chenille' || !q.type ? t('ty.chenille') : t('ty.patins'), q.w && (t('qs.width') + ' ' + esc(q.w)), q.p && (t('qs.pitch') + ' ' + esc(q.p)), q.l && (t('qs.links') + ' ' + esc(q.l))].filter(Boolean).join(' · ');
+      res.list = searchDims(q.type || 'chenille', q.w, q.p, q.l, q.g);
+      res.title = t('s.dims'); res.pre = { tab: 'dims', type: q.type, w: q.w, p: q.p, l: q.l, g: q.g };
+      res.sub = [q.type === 'chenille' || !q.type ? t('ty.chenille') : t('ty.patins'), q.w && (t('qs.width') + ' ' + esc(q.w)), q.p && (t('qs.pitch') + ' ' + esc(q.p)), q.l && (t('qs.links') + ' ' + esc(q.l)), q.g && (t('qs.guide') + ' ' + esc(q.g))].filter(Boolean).join(' · ');
     } else { res.list = VT.products.slice(); res.title = t('s.all'); }
     return res;
   }
@@ -958,7 +967,7 @@
   V.search = {
     html: function (r) {
       var q = r.query, s = searchResult(r);
-      var contactQ = { q: q.q, brand: q.brand, model: q.model, type: q.type, w: q.w, p: q.p, l: q.l };
+      var contactQ = { q: q.q, brand: q.brand, model: q.model, type: q.type, w: q.w, p: q.p, l: q.l, g: q.g };
       return '<section class="pg-hero pg-hero-s"><div class="wrap">' + crumbs([[t('r.search')]]) +
         '<h1 class="pg-title pg-title-s" data-split>' + s.title + '</h1>' + (s.sub ? '<p class="pg-lead mono" data-reveal="fade">' + s.sub + '</p>' : '') +
         '<div class="cat-qs" data-reveal>' + quickSearch(s.pre) + '</div></div><i class="pg-line" aria-hidden="true"></i></section>' +
@@ -1075,7 +1084,7 @@
     });
     $('[data-measure-search]', form).addEventListener('click', function () {
       var d = values();
-      if (tab === 'chenille') location.hash = href('search', null, { type: 'chenille', w: d.W || 400, p: d.P || 72.5, l: d.N || '' });
+      if (tab === 'chenille') location.hash = href('search', null, { type: 'chenille', w: d.W || 400, p: d.P || 72.5, l: d.N || '', g: (d.G || '').toUpperCase() });
       else if (tab === 'bolton') location.hash = href('search', null, { type: tab, w: d.T || EXAMPLE.bolton.tw, p: d.P || EXAMPLE.bolton.p });
       else location.hash = href('search', null, { type: tab, w: d.L || EXAMPLE[tab].L, p: d.P || EXAMPLE[tab].p });
     });
@@ -1167,6 +1176,21 @@
       sync(box);
     });
   }
+  // Livraison : à l'adresse de facturation par défaut, sinon nouveaux champs obligatoires
+  function mountShipping(root) {
+    var box = $('[data-ship-same]', root), block = $('[data-ship]', root); if (!box || !block) return;
+    var fields = $$('input', block), needed = fields.filter(function (el) { return el.required; });
+    var sync = function () {
+      block.hidden = box.checked;
+      fields.forEach(function (el) { el.disabled = box.checked; });
+      needed.forEach(function (el) { el.required = !box.checked; });
+    };
+    box.addEventListener('change', function () {
+      sync();
+      if (!box.checked && window.Motion) Motion.panelIn(block);
+    });
+    sync();
+  }
   function plateRemoved(root, id) {
     var form = $('#qform', root), block = $('[data-plate="' + id + '"]', root);
     if (block) block.remove();
@@ -1190,9 +1214,18 @@
         '<h2 class="mini-t">' + t('q.items') + '</h2><ul class="qlist" data-qlist>' + S.cart.map(lineHTML).join('') + '</ul>' +
         '<form class="qform" id="qform" data-form="quote" novalidate>' + platesFieldset() +
         '<fieldset><legend class="mini-t">' + t('q.form') + '</legend><div class="ff-grid">' +
-        field('company', t('f.company'), { auto: 'organization' }) + field('name', t('f.name'), { req: true, auto: 'name' }) +
+        field('company', t('f.company'), { req: true, auto: 'organization' }) + field('name', t('f.name'), { req: true, auto: 'name' }) +
         field('email', t('f.email'), { req: true, type: 'email', auto: 'email' }) + field('phone', t('f.phone'), { req: true, type: 'tel', auto: 'tel' }) +
-        field('zip', t('f.zip'), { auto: 'postal-code', mode: 'numeric' }) + '</div></fieldset>' +
+        field('address', t('f.address'), { req: true, wide: true, auto: 'billing street-address' }) +
+        field('zip', t('f.zip'), { req: true, auto: 'billing postal-code', mode: 'numeric' }) + field('city', t('f.city'), { req: true, auto: 'billing address-level2' }) +
+        field('country', t('f.country'), { req: true, auto: 'billing country-name', value: 'France' }) + '</div></fieldset>' +
+        '<fieldset><legend class="mini-t">' + t('q.ship') + '</legend><p class="plate-hint">' + t('q.shipHint') + '</p>' +
+        '<label class="check ship-same"><input type="checkbox" name="ship_same" value="1" checked data-ship-same><span class="check-box" aria-hidden="true"></span><span>' + t('f.shipSame') + '</span></label>' +
+        '<div class="ff-grid ship-fields" data-ship hidden>' +
+        field('ship_company', t('f.company'), { auto: 'shipping organization' }) + field('ship_name', t('f.name'), { req: true, auto: 'shipping name' }) +
+        field('ship_phone', t('f.phone'), { req: true, type: 'tel', auto: 'shipping tel' }) + field('ship_address', t('f.address'), { req: true, wide: true, auto: 'shipping street-address' }) +
+        field('ship_zip', t('f.zip'), { req: true, auto: 'shipping postal-code', mode: 'numeric' }) + field('ship_city', t('f.city'), { req: true, auto: 'shipping address-level2' }) +
+        field('ship_country', t('f.country'), { req: true, auto: 'shipping country-name', value: 'France' }) + '</div></fieldset>' +
         '<fieldset><legend class="mini-t">' + t('q.machine') + '</legend><div class="ff-grid">' +
         field('brand', t('f.brand'), { select: brandSelect() }) + field('model', t('f.model')) +
         field('count', t('f.count'), { type: 'number', mode: 'numeric', value: '1' }) +
@@ -1235,6 +1268,7 @@
       }
       mountForm(root, 'quote');
       mountPlates(root);
+      mountShipping(root);
     }
   };
   function refreshSummary(root) { var s = $('[data-qsum]', root); if (s) s.innerHTML = summaryHTML(); }
@@ -1431,7 +1465,7 @@
         }).join('') + '</div></section>' +
         '<section class="sec sec-dark"><div class="wrap"><div class="values" data-reveal="stagger">' + a.values.map(function (v) {
           return '<div class="value"><h3 class="h3">' + v[0] + '</h3><p>' + v[1] + '</p></div>';
-        }).join('') + '</div><div class="sisters" data-reveal><span class="mini-t">' + t('ft.sister') + '</span><b>V-Track</b><b>V-Tilt <small>' + t('ft.soon') + '</small></b><b>V-Drill <small>' + t('ft.soon') + '</small></b></div></div></section>' +
+        }).join('') + '</div><div class="sisters" data-reveal><span class="mini-t">' + t('ft.sister') + '</span><b>V-Track</b><b>' + t('ft.new') + ' <small>' + t('ft.soon') + '</small></b></div></div></section>' +
         commitments(false) + ctaBlock();
     }
   };
@@ -1476,17 +1510,22 @@
   };
 
   function gearIcon() {
-    return '<svg viewBox="61 136 322 322"><path class="gi-g" fill-rule="evenodd" d="' + (window.VT_LOGO ? VT_LOGO.gearFull : '') + '"/><path class="gi-v" d="M190 246h30l12 60 12-60h30l-27 92h-30z"/></svg>';
+    var B = window.VT_BRAND; if (!B) return '';
+    return '<svg viewBox="30 160 296 180"><path class="gi-v" fill-rule="evenodd" d="' + B.valmat.val[0] + '"/></svg>';
   }
   function logoSVG(variant) {
-    var L = window.VT_LOGO; if (!L) return 'V-TRACK';
-    if (variant === 'icon') {
-      return '<svg viewBox="61 136 322 322" aria-hidden="true"><path class="pl-gear pt-gear lg-gfull" fill-rule="evenodd" d="' + L.gearFull + '"/><path class="pl-vi lg-vi" d="M190 246h30l12 60 12-60h30l-27 92h-30z"/></svg>';
+    var B = window.VT_BRAND; if (!B) return variant === 'vtrack' ? 'V-TRACK' : 'VALMAT';
+    if (variant === 'vtrack') {
+      return '<svg class="vk-logo" viewBox="' + B.vtrack.box.join(' ') + '" role="img" aria-label="V-Track"><path class="vk-r" fill-rule="evenodd" d="' + B.vtrack.rest + '"/><path class="vk-v" fill-rule="evenodd" d="' + B.vtrack.v + '"/></svg>';
     }
-    return '<svg class="vt-logo" viewBox="60 136 720 322" role="img" aria-label="V-Track">' +
-      '<path class="lg-gear" d="' + L.gearOpen + '"/><path class="lg-belt" d="' + L.beltTop + '"/><path class="lg-belt" d="' + L.beltBot + '"/>' +
-      '<text class="lg-v" x="188" y="338" textLength="82" lengthAdjust="spacingAndGlyphs">V</text>' +
-      '<text class="lg-t" x="308" y="338" textLength="456" lengthAdjust="spacingAndGlyphs">TRACK</text></svg>';
+    var part = function (d) { return '<path class="vm-p" fill-rule="evenodd" d="' + d + '"/>'; };
+    return '<svg class="vm-logo" viewBox="' + B.valmat.box.join(' ') + '" role="img" aria-label="Valmat"><g class="vm-val">' + B.valmat.val.map(part).join('') + '</g><g class="vm-mat">' + B.valmat.mat.map(part).join('') + '</g></svg>';
+  }
+  // Valmat partout ; le logo V-Track s'ajoute sur les chenilles, les pads et les patins
+  function isVtrackPage(r) {
+    if (r.route === 'chenilles' || r.route === 'patins' || r.route === 'identifier') return true;
+    var p = r.route === 'product' && P[r.param];
+    return !!p && FAMILY[p.type] !== 'autres';
   }
 
   /* ------------------------------------------------------------ recherche en-tête */
@@ -1506,7 +1545,7 @@
     function renderSug() {
       var q = input.value.trim();
       if (!q) {
-        out.innerHTML = '<p class="so-try"><span class="mini-t">' + t('so.try') + '</span>' + ['KX057', 'kx 57', '400x72.5x74', '400 72,5 74', 'TB260', '400HD', 'Takeuchy'].map(function (s) { return '<button type="button" class="chip" data-try="' + s + '">' + s + '</button>'; }).join('') + '</p>';
+        out.innerHTML = '<p class="so-try"><span class="mini-t">' + t('so.try') + '</span>' + ['KX057', 'kx 57', '400x72.5Wx74', '400 72,5 74', 'TB260', '400HD', 'Takeuchy'].map(function (s) { return '<button type="button" class="chip" data-try="' + s + '">' + s + '</button>'; }).join('') + '</p>';
         return;
       }
       var ms = searchMachines(q), ps = searchText(q).slice(0, 6);
@@ -1592,7 +1631,7 @@
     main.innerHTML = view.html(r);
     main.setAttribute('data-route', r.route);
     document.body.setAttribute('data-route', r.route);
-    document.title = r.route === 'home' ? t('meta.title') : routeLabel(r) + ' · V-Track';
+    document.title = r.route === 'home' ? t('meta.title') : routeLabel(r) + ' · Valmat';
     var md = $('meta[name="description"]'); if (md) md.setAttribute('content', t('meta.desc'));
     ['fr', 'en'].forEach(function (L) { var l = $('link[hreflang="' + L + '"]'); if (l) l.setAttribute('href', href(r.route, r.param, r.query, L)); });
     $$('.nav-a').forEach(function (a) {
@@ -1600,6 +1639,7 @@
       var on = id === r.route || (r.route === 'product' && P[r.param] && (FAMILY[P[r.param].type] === (id === 'chenilles' ? 'chenille' : id)));
       a.classList.toggle('is-on', !!on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
+    var hb = $('[data-hdr-brand]'); if (hb) hb.hidden = !isVtrackPage(r);
     if (view.mount) view.mount(main, r);
     updateCount(false);
   }
