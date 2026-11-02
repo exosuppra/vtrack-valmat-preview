@@ -28,6 +28,8 @@
   indexCatalog();
   var FAMILY = { chenille: 'chenille', roadliner: 'patins', clipon: 'patins', bolton: 'patins', tariere: 'autres', brh: 'autres' };
   var PAD_TYPES = ['roadliner', 'clipon', 'bolton'];
+  // BRH et tarières : la platine dépend de la machine du client, elle se précise dans la demande de devis.
+  var PLATE_TYPES = ['tariere', 'brh'];
 
   var S = { lang: 'fr', cart: store.get('vt.quote', []), route: null, first: true };
 
@@ -312,6 +314,8 @@
     if (i.custom) return t('q.custom') + ' · ' + t('ty.' + i.type) + ' · ' + customLabel(i);
     var p = P[i.id]; return p ? pname(p) + ' (' + p.ref + ')' : i.id;
   }
+  function needsPlate(i) { var p = !i.custom && P[i.id]; return !!p && PLATE_TYPES.indexOf(p.type) > -1; }
+  function plateText(i) { return i.plateUnknown ? t('q.plateUnknown') : String(i.plate || '').trim(); }
 
   function toast(msg, action) {
     var box = $('[data-toasts]'); if (!box) return;
@@ -873,6 +877,7 @@
         '<div class="qty" data-qty><button type="button" data-step="-1" aria-label="' + t('pr.dec') + '">−</button><input type="number" min="1" max="999" value="1" aria-label="' + t('pr.qty') + '"><button type="button" data-step="1" aria-label="' + t('pr.inc') + '">+</button></div>' +
         '<button class="btn btn-o btn-lg" type="button" data-add="' + p.id + '" data-add-qty data-magnetic><span>' + t('pr.addLong') + '</span></button>' +
         '<a class="btn btn-line btn-lg" href="tel:' + VT.config.phoneHref + '"><span>' + t('pr.call') + '</span></a></div>' +
+        (PLATE_TYPES.indexOf(p.type) > -1 ? '<p class="pr-plate" data-reveal="fade">' + t('pr.plate') + '</p>' : '') +
         '<p class="price mono" data-reveal="fade">' + t('p.price') + '</p>' +
         '<ul class="pr-reassure" data-reveal="stagger"><li>' + t('pr.r1') + '</li><li>' + t('pr.r2') + '</li><li>' + t('pr.r3') + '</li></ul>' +
         (guideTab ? '<p class="pr-check" data-reveal="fade">' + t('pr.check') + ' <a class="link-o" href="' + href('identifier', guideTab) + '">' + t('pr.guide') + ' →</a></p>' : '') +
@@ -1120,6 +1125,57 @@
   function brandSelect(sel) {
     return '<option value="">—</option>' + brandsList().map(function (b) { return '<option' + (b === sel ? ' selected' : '') + '>' + b + '</option>'; }).join('') + '<option>' + (S.lang === 'fr' ? 'Autre' : 'Other') + '</option>';
   }
+  function plateField(i) {
+    return '<div class="plate ff-wide" data-plate="' + i.id + '">' +
+      field('plate-' + i.id, t('f.plate') + ' · ' + pname(P[i.id]), { req: true, value: i.plate }) +
+      '<label class="check"><input type="checkbox" data-plate-unknown="' + i.id + '"' + (i.plateUnknown ? ' checked' : '') + '><span class="check-box" aria-hidden="true"></span><span>' + t('f.plateUnknown') + '</span></label></div>';
+  }
+  function platesFieldset() {
+    var lines = S.cart.filter(needsPlate);
+    if (!lines.length) return '';
+    return '<fieldset data-plates><legend class="mini-t">' + t('q.plateT') + '</legend><p class="plate-hint">' + t('q.plateHint') + '</p>' +
+      '<div class="ff-grid">' + lines.map(plateField).join('') + '</div></fieldset>';
+  }
+  // Pour choisir une platine compatible, Valmat a besoin de la marque et du modèle de la machine.
+  function machineRequired(form, on) {
+    ['brand', 'model'].forEach(function (name) {
+      var el = form.elements[name], small = $('small', el.closest('.ff'));
+      el.required = on;
+      if (small) small.hidden = on;
+    });
+  }
+  function mountPlates(root) {
+    var form = $('#qform', root); if (!form) return;
+    var lineOf = function (id) { return S.cart.filter(function (x) { return x.id === id; })[0]; };
+    var sync = function (box) {
+      var inp = form.elements['plate-' + box.getAttribute('data-plate-unknown')];
+      if (box.checked) inp.dispatchEvent(new Event('input', { bubbles: true })); // efface l'erreur éventuelle
+      inp.disabled = box.checked; inp.required = !box.checked;
+    };
+    $$('[data-plate-unknown]', form).forEach(sync);
+    machineRequired(form, S.cart.some(needsPlate));
+    form.addEventListener('input', function (e) {
+      var name = e.target.name || '';
+      if (name.indexOf('plate-') !== 0) return;
+      var line = lineOf(name.slice(6));
+      if (line) { line.plate = e.target.value; store.set('vt.quote', S.cart); }
+    });
+    form.addEventListener('change', function (e) {
+      var box = e.target.closest('[data-plate-unknown]'); if (!box) return;
+      var line = lineOf(box.getAttribute('data-plate-unknown'));
+      if (line) { line.plateUnknown = box.checked; store.set('vt.quote', S.cart); }
+      sync(box);
+    });
+  }
+  function plateRemoved(root, id) {
+    var form = $('#qform', root), block = $('[data-plate="' + id + '"]', root);
+    if (block) block.remove();
+    if (form && !S.cart.some(needsPlate)) {
+      var set = $('[data-plates]', form);
+      if (set) set.remove();
+      machineRequired(form, false);
+    }
+  }
   V.devis = {
     html: function () {
       if (!S.cart.length) {
@@ -1132,7 +1188,7 @@
         '<p class="pg-lead" data-reveal>' + t('q.sub') + '</p>' + stepsBar(1) + '</div></section>' +
         '<section class="sec sec-tight"><div class="wrap quote-grid"><div class="quote-main">' +
         '<h2 class="mini-t">' + t('q.items') + '</h2><ul class="qlist" data-qlist>' + S.cart.map(lineHTML).join('') + '</ul>' +
-        '<form class="qform" id="qform" data-form="quote" novalidate>' +
+        '<form class="qform" id="qform" data-form="quote" novalidate>' + platesFieldset() +
         '<fieldset><legend class="mini-t">' + t('q.form') + '</legend><div class="ff-grid">' +
         field('company', t('f.company'), { auto: 'organization' }) + field('name', t('f.name'), { req: true, auto: 'name' }) +
         field('email', t('f.email'), { req: true, type: 'email', auto: 'email' }) + field('phone', t('f.phone'), { req: true, type: 'tel', auto: 'tel' }) +
@@ -1164,7 +1220,7 @@
             var removed = S.cart.filter(function (x) { return x.id === id; })[0], at = S.cart.indexOf(removed);
             S.cart = S.cart.filter(function (x) { return x.id !== id; }); saveCart();
             var after = function () {
-              row.remove(); refreshSummary(root);
+              row.remove(); refreshSummary(root); plateRemoved(root, id);
               if (!S.cart.length) rerender();
             };
             if (window.Motion) Motion.collapse(row, after); else after();
@@ -1178,6 +1234,7 @@
         });
       }
       mountForm(root, 'quote');
+      mountPlates(root);
     }
   };
   function refreshSummary(root) { var s = $('[data-qsum]', root); if (s) s.innerHTML = summaryHTML(); }
@@ -1208,7 +1265,10 @@
     data.delete('photos');
     data.set('kind', kind); data.set('lang', S.lang); data.set('t', String(Date.now() - t0));
     if (kind === 'quote') data.set('items', JSON.stringify(S.cart.map(function (i) {
-      return i.custom ? { custom: true, type: i.type, dims: i.dims, qty: i.qty } : { id: i.id, qty: i.qty, label: lineLabel(i) };
+      if (i.custom) return { custom: true, type: i.type, dims: i.dims, qty: i.qty };
+      var o = { id: i.id, qty: i.qty, label: lineLabel(i) };
+      if (needsPlate(i)) { o.plate = String(i.plate || '').trim(); o.plate_unknown = !!i.plateUnknown; }
+      return o;
     })));
     var demo = function () { return { ok: true, demo: true }; };
     return Promise.all(files.map(shrinkPhoto)).then(function (list) {
@@ -1278,7 +1338,7 @@
       var req = {
         kind: kind, num: 'VT-' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
         name: String(data.get('name') || '').trim().split(' ')[0], email: String(data.get('email') || '').trim(), lang: S.lang,
-        items: kind === 'quote' ? S.cart.map(function (i) { return { label: lineLabel(i), qty: i.qty }; }) : [],
+        items: kind === 'quote' ? S.cart.map(function (i) { return { label: lineLabel(i) + (needsPlate(i) ? ' · ' + t('q.plateLabel') + ' ' + plateText(i) : ''), qty: i.qty }; }) : [],
         photos: files.length, at: d.toISOString()
       };
       if (data.get('website')) { done(); return; } // anti-spam : envoi ignoré

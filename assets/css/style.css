@@ -482,6 +482,7 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .pr-reassure li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #c6cbd0; }
 .pr-reassure li::before { content: ''; width: 13px; height: 7px; border-left: 2px solid var(--o); border-bottom: 2px solid var(--o); transform: rotate(-45deg) translateY(-3px); flex: none; }
 .pr-check { margin: 22px 0 0; color: var(--mut); font-size: 14px; }
+.pr-plate { margin: 22px 0 0; padding: 12px 14px; border-left: 3px solid var(--o); background: var(--a); color: var(--w); font-size: 16px; line-height: 1.45; }
 .draw-pair { display: grid; gap: 18px; }
 @media (min-width: 1000px) { .draw-pair { grid-template-columns: 1fr 1fr; } }
 .sheet-fig { margin: 0; background-color: var(--a); border: 1px solid var(--line); padding: 16px; }
@@ -645,6 +646,9 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .ff.is-err input, .ff.is-err select, .ff.is-err textarea { border-bottom-color: var(--err); }
 .ff-err { font-size: 12px; color: var(--err); }
 .ff-err:empty { display: none; }
+.plate-hint { margin: 0 0 16px; color: var(--mut); font-size: 16px; line-height: 1.45; }
+.plate { display: grid; gap: 10px; }
+.plate input:disabled { opacity: .4; cursor: not-allowed; }
 .check.is-err .check-box { border-color: var(--err); }
 .check-l { display: grid; grid-template-columns: 20px 1fr; align-items: start; gap: 12px; font-size: 14px; color: #d0d4d8; line-height: 1.5; }
 .check-l .ff-err { grid-column: 2; }
