@@ -28,8 +28,8 @@
   indexCatalog();
   var FAMILY = { chenille: 'chenille', roadliner: 'patins', clipon: 'patins', bolton: 'patins', tariere: 'autres', brh: 'autres' };
   var PAD_TYPES = ['roadliner', 'clipon', 'bolton'];
-  // BRH et tarières : la platine dépend de la machine du client, elle se précise dans la demande de devis.
-  var PLATE_TYPES = ['tariere', 'brh'];
+  // Tarières : le type de platine se précise dans la demande de devis. BRH : formulaire de demande de platine envoyé au client.
+  var PLATE_TYPES = ['tariere'];
 
   var S = { lang: 'fr', cart: store.get('vt.quote', []), route: null, first: true };
 
@@ -144,12 +144,14 @@
   function enginesOf(p) { return uniq(machinesOf(p).map(function (m) { return m.type; })); }
   function brandsOf(p) { return uniq(machinesOf(p).map(function (m) { return m.brand; })); }
   function tonnageOf(p) {
+    if (p.type === 'brh' && p.dims && p.dims.tmin != null) return [p.dims.tmin, p.dims.tmax];
     var ts = machinesOf(p).map(function (m) { return m.t; }).filter(function (v) { return v != null && !isNaN(v); });
     return [Math.min.apply(null, ts), Math.max.apply(null, ts)];
   }
   function widthOf(p) { return p.dims ? (p.type === 'chenille' ? p.dims.w : (p.dims.tw || p.dims.L)) : null; }
   function dimsLabel(p) {
     var d = p.dims; if (!d) return '';
+    if (p.type === 'brh') return p.ref;
     return p.type === 'chenille' ? num(d.w) + ' × ' + num(d.p) + (d.g || '') + ' × ' + d.l : d.p + '-' + (d.tw || d.L);
   }
   function pname(p) { return (p.name && p.name[S.lang]) || t('n.' + p.type, { d: dimsLabel(p) }); }
@@ -195,7 +197,7 @@
       '<p class="pcard-type">' + t('ty.' + p.type) + '</p>' +
       '<h3 class="pcard-title"><a href="' + link + '">' + pname(p) + '</a></h3>' +
       '<p class="pcard-ref mono">' + t('p.ref') + ' ' + esc(p.ref) + '</p>' +
-      '<p class="pcard-fit">' + (p.machines.length ? '<span>' + t('p.fits') + '</span> ' + fitsLine(p) : '<span>' + (p.cls ? t('sp.cls') + ' : ' + esc(p.cls) : t('p.fitsAsk')) + '</span>') + '</p>' +
+      '<p class="pcard-fit">' + (p.type === 'brh' && p.dims && p.dims.tmin != null ? '<span>' + t('brh.fit', { a: num(p.dims.tmin), b: num(p.dims.tmax) }) + '</span>' : p.machines.length ? '<span>' + t('p.fits') + '</span> ' + fitsLine(p) : '<span>' + (p.cls ? t('sp.cls') + ' : ' + esc(p.cls) : t('p.fitsAsk')) + '</span>') + '</p>' +
       avail(p) +
       '<div class="pcard-foot"><span class="price">' + t('p.price') + '</span>' +
       '<button class="btn btn-o btn-sm" type="button" data-add="' + p.id + '"><span>' + t('p.add') + '</span></button></div>' +
@@ -296,10 +298,11 @@
     $$('[data-cart-count]').forEach(function (el) { el.textContent = n; el.classList.toggle('is-zero', n === 0); });
     if (bump && window.Motion) Motion.bump();
   }
-  function addToCart(id, qty, fromEl) {
+  function addToCart(id, qty, fromEl, opts) {
     qty = Math.max(1, qty || 1);
     var line = S.cart.filter(function (i) { return i.id === id; })[0];
-    if (line) line.qty += qty; else S.cart.push({ id: id, qty: qty });
+    if (line) line.qty += qty; else S.cart.push(line = { id: id, qty: qty });
+    if (opts && opts.grease) line.grease = true;
     if (window.Motion) Motion.fly(fromEl, function () { saveCart(); });
     else saveCart();
     toast(t('tt.added'), { label: t('tt.view'), href: href('devis') });
@@ -318,6 +321,10 @@
     var p = P[i.id]; return p ? pname(p) + ' (' + p.ref + ')' : i.id;
   }
   function needsPlate(i) { var p = !i.custom && P[i.id]; return !!p && PLATE_TYPES.indexOf(p.type) > -1; }
+  function isBrh(i) { var p = !i.custom && P[i.id]; return !!p && p.type === 'brh'; }
+  function hasGrease(i) { var p = !i.custom && P[i.id]; return !!(i.grease && p && p.type === 'brh' && p.dims && p.dims.grease); }
+  // Marque et modèle de la machine obligatoires dès qu'une platine est à prévoir
+  function needsMachine() { return S.cart.some(function (i) { return needsPlate(i) || isBrh(i); }); }
   function plateText(i) { return i.plateUnknown ? t('q.plateUnknown') : String(i.plate || '').trim(); }
 
   function toast(msg, action) {
@@ -372,22 +379,6 @@
         dimV(512, 80, 210, 'l', d.l, { side: 'r', ext: [[482, 80, 518, 80], [482, 210, 518, 210]] }),
         'Roadliner, ' + L.travel);
     },
-    roadlinerSide: function (d, L) {
-      var pads = '', i;
-      for (i = 0; i < 3; i++) {
-        var x = 92 + i * 135;
-        pads += '<rect class="pad" x="' + x + '" y="84" width="101" height="66" rx="6"/><rect class="core" x="' + (x + 8) + '" y="90" width="85" height="7" rx="2"/>';
-      }
-      var axes = [75, 210, 345, 480].map(function (x) { return '<circle class="axle" cx="' + x + '" cy="60" r="8"/><circle class="axle-c" cx="' + x + '" cy="60" r="2.5"/>'; }).join('');
-      return svgWrap('0 0 560 240',
-        '<rect class="link" x="62" y="48" width="431" height="24" rx="12"/>' + axes + pads +
-        '<line class="ground" x1="40" y1="150" x2="530" y2="150"/><text class="lbl" x="44" y="166">' + L.ground + '</text>' +
-        '<path class="call" d="M480 52L492 30"/><text class="lbl" x="452" y="22">' + L.axis + '</text>' +
-        dimH(210, 345, 34, 'P', d.p, { ext: [[210, 40, 210, 52], [345, 40, 345, 52]] }) +
-        dimH(227, 328, 190, 'l', d.l, { ext: [[227, 152, 227, 196], [328, 152, 328, 196]] }) +
-        dimV(512, 84, 150, 'h', d.h, { side: 'r', ext: [[464, 84, 518, 84], [464, 150, 518, 150]] }),
-        'Roadliner, ' + L.axis);
-    },
     boltFace: function (d, L) {
       var slot = function (cx, cy) { return '<rect class="slot" x="' + (cx - 13) + '" y="' + (cy - 7) + '" width="26" height="14" rx="5"/>'; };
       return svgWrap('0 0 560 300',
@@ -402,20 +393,6 @@
         dimV(512, 92, 208, 'l', d.l, { side: 'r', ext: [[482, 92, 518, 92], [482, 208, 518, 208]] }),
         'Bolt-On, ' + L.slots);
     },
-    boltSection: function (d, L) {
-      var bolt = function (x) { return '<rect class="bsc" x="' + (x - 9) + '" y="239" width="18" height="168"/><rect class="bnut" x="' + (x - 31) + '" y="357" width="63" height="32" rx="3"/>'; };
-      return svgWrap('0 0 560 262',
-        '<g transform="translate(68 60) scale(.62) translate(-137 -148)">' +
-        '<path class="tile-s" d="M137 357V245L158 221H187L201 293H433L449 244H505L523 293H755L769 221H800L819 245V357Z"/>' +
-        '<path class="pad" d="M197 168Q197 148 217 148H740Q760 148 760 168V210L747 224V284H527V226H429V284H210V224L197 210Z"/>' +
-        bolt(319) + bolt(637) + '</g>' +
-        '<text class="lbl lbl-c" x="280" y="92" text-anchor="middle">' + L.padName + '</text>' +
-        '<path class="call" d="M88 190V228"/><text class="lbl" x="60" y="246">' + L.tile + '</text>' +
-        '<path class="call" d="M378 222V228"/><text class="lbl" x="378" y="246" text-anchor="middle">' + L.bolts + '</text>' +
-        dimH(105, 454, 44, 'l', d.l, { ext: [[105, 38, 105, 58], [454, 38, 454, 58]] }) +
-        dimV(520, 60, 144, 'h', d.h, { side: 'r', ext: [[456, 60, 526, 60], [456, 144, 526, 144]] }),
-        'Bolt-On, ' + L.tile);
-    },
     clipTop: function (d, L) {
       var clip = function (x) { return '<rect class="clip" x="' + x + '" y="52" width="37" height="134" rx="3"/>'; };
       return svgWrap('0 0 560 260',
@@ -427,51 +404,6 @@
         dimH(60, 480, 228, 'L', d.L, { ext: [[60, 188, 60, 234], [480, 188, 480, 234]] }) +
         dimV(516, 56, 182, 'W', d.W, { side: 'r', ext: [[487, 56, 522, 56], [487, 182, 522, 182]] }),
         'Clip-On, ' + L.nodrill);
-    },
-    clipSection: function (d, L) {
-      var screw = function (x) {
-        return '<circle class="screw-r" cx="' + x + '" cy="345" r="40"/><circle class="screw" cx="' + x + '" cy="345" r="32"/>' +
-          '<path class="screw-h" d="M' + (x - 26) + ' 345L' + (x - 13) + ' 322.5H' + (x + 13) + 'L' + (x + 26) + ' 345L' + (x + 13) + ' 367.5H' + (x - 13) + 'Z"/>';
-      };
-      return svgWrap('0 0 560 350',
-        '<g transform="translate(130 70) scale(.709) translate(-308 -218)">' +
-        '<rect class="pad" x="308" y="218" width="423" height="195" rx="16"/>' +
-        '<rect class="plate" x="300" y="413" width="440" height="33"/>' +
-        '<rect class="plate" x="370" y="270" width="299" height="192" rx="12"/>' +
-        '<path class="hid" d="M469 410V345H571V410"/>' +
-        screw(429) + screw(611) + '</g>' +
-        '<path class="call" d="M132 219L70 262"/><text class="lbl" x="20" y="280">' + L.tile + '</text>' +
-        '<circle class="dot" cx="280" cy="185" r="2.5"/><path class="call" d="M280 185L258 306"/><text class="lbl" x="254" y="312" text-anchor="end">' + L.ribHidden + '</text>' +
-        '<text class="lbl" x="36" y="334">' + L.chainSide + '</text><rect class="chain" x="20" y="340" width="520" height="6"/>' +
-        dimH(130, 430, 34, 'W', d.W, { suffix: ' (' + L.travelDir + ')', ext: [[130, 40, 130, 66], [430, 40, 430, 66]] }) +
-        dimV(96, 70, 208, 'H', d.H, { ext: [[128, 70, 90, 70], [128, 208, 90, 208]] }) +
-        dimH(216, 345, 270, 'S', 0, { plain: L.screws, ext: [[216, 190, 216, 276], [345, 190, 345, 276]] }),
-        'Clip-On, ' + L.ribHidden);
-    },
-    trackTop: function (d, L) {
-      var lugs = '', ticks = '', i;
-      for (i = 0; i < 8; i++) {
-        var x = 52 + i * 60;
-        lugs += '<path class="lug" d="M' + x + ' 64h18l20 61l-20 61h-18l20-61z"/>';
-        ticks += '<text class="tick" x="' + (x + 19) + '" y="210" text-anchor="middle">' + (i + 1) + '</text>';
-      }
-      return svgWrap('0 0 560 260',
-        '<rect class="band" x="40" y="60" width="480" height="130" rx="4"/>' + lugs + ticks +
-        dimV(22, 60, 190, 'W', d.w, { ext: [[38, 60, 16, 60], [38, 190, 16, 190]] }) +
-        dimH(172, 232, 38, 'P', d.p, { suffix: '<tspan data-v="G">' + (d.g || '') + '</tspan>', ext: [[172, 44, 172, 62], [232, 44, 232, 62]] }) +
-        '<text class="dt" x="290" y="240" text-anchor="middle">' + L.count.replace('{n}', '<tspan data-v="N">' + d.l + '</tspan>') + '</text>',
-        'Track, ' + L.width);
-    },
-    trackFlank: function (d, L) {
-      var g = window.VT_LOGO ? VT_LOGO.gearFull : '';
-      return svgWrap('0 0 560 210',
-        '<path class="loop" d="M130 44H430A61 61 0 0 1 430 166H130A61 61 0 0 1 130 44Z"/>' +
-        '<path class="loop-in" d="M130 58H430A47 47 0 0 1 430 152H130A47 47 0 0 1 130 58Z"/>' +
-        '<g class="sprk-wrap" transform="translate(430 105)"><g class="sprk"><path transform="scale(.27) translate(-222 -297)" fill-rule="evenodd" d="' + g + '"/></g></g>' +
-        '<circle class="idler" cx="130" cy="105" r="36"/><circle class="idler-c" cx="130" cy="105" r="8"/>' +
-        [205, 265, 325].map(function (x) { return '<circle class="roller" cx="' + x + '" cy="140" r="9"/>'; }).join('') +
-        '<text class="mark" x="282" y="30" text-anchor="middle"><tspan data-v="W">' + num(d.w) + '</tspan> × <tspan data-v="P">' + num(d.p) + '</tspan><tspan data-v="G">' + (d.g || '') + '</tspan> × <tspan data-v="N">' + d.l + '</tspan></text>',
-        'Track', ' data-loop');
     },
     pitch: function () {
       var axes = [70, 190, 310, 430, 550], br = '', i;
@@ -487,12 +419,24 @@
         '</svg>';
     }
   };
+  // Schémas fournis par Valmat : vues de côté des patins, chenille vue de dessus et animée, coupe du BRH
+  function drawImg(file, alt) { return '<img class="draw-img" src="assets/img/' + file + '" alt="' + esc(alt) + '" loading="lazy" decoding="async">'; }
+  var BRH_TAGS = [['rear', 'right:30.52%;bottom:93.19%'], ['rod', 'left:74.23%;bottom:93.41%'], ['valve', 'right:39.79%;bottom:87.3%'],
+    ['cyl', 'right:38.97%;bottom:81.62%'], ['acc', 'right:46.6%;bottom:75.07%'], ['piston', 'right:55.05%;bottom:67.43%'],
+    ['front', 'right:65.36%;bottom:59.57%'], ['pin', 'right:69.69%;bottom:53.24%'], ['tool', 'right:80.82%;bottom:34.68%']];
+  function brhCut() {
+    return '<div class="brh-cut"><img src="assets/img/brh/coupe.png" alt="' + esc(t('brh.cutAlt')) + '" loading="lazy">' +
+      BRH_TAGS.map(function (b) { return '<span class="brh-tag" style="' + b[1] + '">' + t('brh.c.' + b[0]) + '</span>'; }).join('') + '</div>';
+  }
   function drawingsFor(type, d) {
-    var L = C().guide.labels;
-    if (type === 'chenille') return [DRAW.trackTop(d, L), DRAW.trackFlank(d, L)];
-    if (type === 'roadliner') return [DRAW.roadlinerBottom(d, L), DRAW.roadlinerSide(d, L)];
-    if (type === 'bolton') return [DRAW.boltFace(d, L), DRAW.boltSection(d, L)];
-    if (type === 'clipon') return [DRAW.clipTop(d, L), DRAW.clipSection(d, L)];
+    var L = C().guide.labels, view = function (i) { return C().guide.tabs[type].views[i]; };
+    if (type === 'chenille') return [
+      drawImg('schema-chenille-dessus.jpg', view(0)) + (d.w ? '<p class="draw-cap mono">L × P × N = ' + num(d.w) + ' × ' + num(d.p) + (d.g || '') + ' × ' + d.l + '</p>' : ''),
+      '<video class="draw-img" src="assets/img/chenille-cote.mp4" poster="assets/img/chenille-cote.jpg" autoplay muted loop playsinline aria-label="' + esc(view(1)) + '"></video>'];
+    if (type === 'roadliner') return [DRAW.roadlinerBottom(d, L), drawImg('schema-cote-roadliner.jpg', view(1))];
+    if (type === 'bolton') return [DRAW.boltFace(d, L), drawImg('schema-cote-bolton.jpg', view(1))];
+    if (type === 'clipon') return [DRAW.clipTop(d, L), drawImg('schema-cote-clipon.jpg', view(1))];
+    if (type === 'brh') return [brhCut()];
     return [];
   }
   // Exemple des guides de mesure (Takeuchi TB260, pas 135, tuile 400) : fixe, indépendant du catalogue.
@@ -534,6 +478,22 @@
       uniq(VT.products.map(function (x) { return x.type === 'chenille' ? x.dims.g : ''; }).filter(Boolean)).sort().map(function (g) { return '<option' + (pre.g === g ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>' +
       '<button class="btn btn-o qs-go" type="submit" data-magnetic><span>' + t('qs.go') + '</span></button></form>' +
       '</div>';
+  }
+  function brhSearch(pre) {
+    pre = pre || {};
+    return '<form class="qs qs-ton" data-ton-search><p class="qs-ton-t mini-t">' + t('brh.searchT') + '</p><div class="qs-panel">' +
+      '<label class="fld"><span>' + t('brh.searchL') + '</span><input name="ton" inputmode="decimal" autocomplete="off" placeholder="8" value="' + esc(pre.ton || '') + '"></label>' +
+      '<button class="btn btn-o qs-go" type="submit" data-magnetic><span>' + t('qs.go') + '</span></button></div></form>';
+  }
+  function mountTonSearch(root) {
+    $$('[data-ton-search]', root).forEach(function (f) {
+      f.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var inp = $('input[name="ton"]', f), v = parseFloat(inp.value.replace(',', '.'));
+        if (!(v > 0)) { inp.focus(); if (window.Motion) Motion.shake(inp.parentNode); return; }
+        location.hash = href('search', null, { ton: String(v) });
+      });
+    });
   }
   function mountQuickSearch(root) {
     $$('[data-qs]', root).forEach(function (qs) {
@@ -792,13 +752,13 @@
           '<div class="wrap">' + crumbs([[t('r.' + id)]]) +
           (id === 'chenilles' || id === 'patins' ? '<div class="brand-mark" data-reveal="fade">' + logoSVG('vtrack') + '</div>' : '') +
           '<h1 class="pg-title" data-split>' + t('r.' + id) + '</h1><p class="pg-lead" data-reveal>' + c.intro + '</p>' +
-          (id === 'stock' ? '' : '<div class="cat-qs" data-reveal>' + quickSearch({ tab: id === 'patins' ? 'dims' : 'model', type: id === 'patins' ? 'patins' : 'chenille' }) + '</div>') +
+          (id === 'stock' ? '' : '<div class="cat-qs" data-reveal>' + (id === 'autres' ? brhSearch() : quickSearch({ tab: id === 'patins' ? 'dims' : 'model', type: id === 'patins' ? 'patins' : 'chenille' })) + '</div>') +
           '</div><i class="pg-line" aria-hidden="true"></i></section>' +
           '<section class="sec sec-tight"><div class="wrap">' + body + notFoundLine() +
           '</div></section>' + commitments(true) + ctaBlock();
       },
       mount: function (root, r) {
-        mountQuickSearch(root);
+        mountQuickSearch(root); mountTonSearch(root);
         var st = stateFrom(r);
         mountFilters(root, { state: st, list: VT.products.filter(CAT[id].filter), chipAttr: CAT[id].chipAttr, onChange: function (f) { replaceUrl(href(id, f.sub || null, queryFrom(f))); } });
       }
@@ -830,6 +790,12 @@
     } else if (p.type === 'clipon') {
       row(t('sp.pitch'), mm(d.p), ok(d.p)); row(t('sp.tile'), mm(d.L), ok(d.L)); row(t('sp.W'), mm(d.W), ok(d.W));
       row(t('sp.H'), mm(d.H), ok(d.H)); row(t('sp.W1H1'), j([d.W1, d.H1], ' × '), ok(d.W1, d.H1)); rows.push([t('sp.matter'), t('sp.matterC')]);
+    } else if (p.type === 'brh') {
+      var rg = function (a, b, u) { return num(a) + ' – ' + num(b) + ' ' + u; };
+      row(t('brh.carrier'), rg(d.tmin, d.tmax, 't'), ok(d.tmin, d.tmax)); row(t('brh.oil'), rg(d.qmin, d.qmax, 'l/min'), ok(d.qmin, d.qmax));
+      row(t('brh.pressure'), rg(d.pmin, d.pmax, 'bar'), ok(d.pmin, d.pmax)); row(t('brh.freq'), rg(d.fmin, d.fmax, 'cps/min'), ok(d.fmin, d.fmax));
+      row(t('brh.energy'), num(d.j) + ' J', ok(d.j)); row(t('brh.hose'), d.hose, ok(d.hose)); row(t('brh.tool'), mm(d.tool), ok(d.tool));
+      rows.push([t('brh.grease'), t(d.grease ? 'brh.greaseYes' : 'brh.greaseNo')]);
     } else {
       rows = [[t('sp.engines'), uniq(enginesOf(p).map(function (e) { return t('e.' + e); })).join(', ') || '—'], [t('sp.range'), t('sp.rangeV')]];
     }
@@ -843,6 +809,20 @@
     var txt = p.desc && (p.desc[S.lang] || p.desc.fr || p.desc.en);
     if (!txt) return '';
     return '<div class="pr-desc" data-reveal>' + String(txt).split(/\n{2,}/).map(function (para) { return '<p>' + esc(para).replace(/\n/g, '<br>') + '</p>'; }).join('') + '</div>';
+  }
+  // BRH : la platine dépend de l'attache rapide du porteur, Valmat la fournit
+  function plateBox(check) {
+    return '<aside class="plate-box" data-reveal><h3 class="plate-box-t">' + t('brh.plateT') + '</h3><p>' + t('brh.plateText') + '</p>' +
+      (check ? '<label class="check"><input type="checkbox" name="plate_form" value="1"><span class="check-box" aria-hidden="true"></span><span>' + t('brh.plateCheck') + '</span></label>' : '') + '</aside>';
+  }
+  // Encart « Pièces détachées spécial BRH » (doc « Structure du BRH »)
+  var BRH_PARTS = ['corps', 'tete-arriere', 'tete-avant', 'cylindre', 'piston', 'bagues-usure', 'bague-butee', 'clavettes',
+    'tirants', 'boulons-lateraux', 'outils', 'axes', 'distributeur', 'joints', 'caisse-outils', 'accumulateur'];
+  function brhParts(p) {
+    return '<section class="sec parts-sec"><div class="wrap"><div class="sec-head sec-head-row"><div>' + eyebrow(t('brh.partsEyebrow')) + '<h2 class="h2" data-split>' + t('brh.partsTitle') + '</h2></div>' +
+      '<p class="sec-lead" data-reveal>' + t('brh.partsText') + '</p></div>' +
+      '<ul class="parts" data-reveal="stagger">' + BRH_PARTS.map(function (k) { return '<li class="part-c"><img src="assets/img/brh/piece-' + k + '.jpg" alt="" loading="lazy"><span>' + t('brh.p.' + k) + '</span></li>'; }).join('') + '</ul>' +
+      '<div class="btn-row parts-cta" data-reveal><a class="btn btn-o btn-lg" href="' + href('contact', null, { msg: t('brh.partsMsg', { ref: p.ref }) }) + '" data-magnetic><span>' + t('brh.partsCta') + '</span></a></div></div></section>';
   }
   // Tableau des machines : 12 lignes, puis « Voir les N machines »
   var TBL_ROWS = 12;
@@ -882,30 +862,33 @@
         '<p class="pr-ref mono" data-reveal="fade">' + t('p.ref') + ' ' + esc(p.ref) + '</p>' +
         '<div data-reveal="fade">' + avail(p) + '</div>' + descHTML(p) +
         '<dl class="specs" data-reveal="stagger">' + specRows(p).map(function (row) { return '<div><dt>' + row[0] + '</dt><dd class="mono">' + esc(row[1]) + '</dd></div>'; }).join('') + '</dl>' +
+        (p.type === 'brh' && p.dims && p.dims.grease ? '<label class="check opt-card" data-reveal><input type="checkbox" data-grease><span class="check-box" aria-hidden="true"></span>' +
+          '<img src="assets/img/option-graissage.jpg" alt="" loading="lazy"><span class="opt-t"><b>' + t('brh.optT') + '</b><small>' + t('brh.optS') + '</small></span></label>' : '') +
         '<div class="pr-buy" data-reveal>' +
         '<div class="qty" data-qty><button type="button" data-step="-1" aria-label="' + t('pr.dec') + '">−</button><input type="number" min="1" max="999" value="1" aria-label="' + t('pr.qty') + '"><button type="button" data-step="1" aria-label="' + t('pr.inc') + '">+</button></div>' +
         '<button class="btn btn-o btn-lg" type="button" data-add="' + p.id + '" data-add-qty data-magnetic><span>' + t('pr.addLong') + '</span></button>' +
         '<a class="btn btn-line btn-lg" href="tel:' + VT.config.phoneHref + '"><span>' + t('pr.call') + '</span></a></div>' +
         (PLATE_TYPES.indexOf(p.type) > -1 ? '<p class="pr-plate" data-reveal="fade">' + t('pr.plate') + '</p>' : '') +
+        (p.type === 'brh' ? plateBox() : '') +
         '<p class="price mono" data-reveal="fade">' + t('p.price') + '</p>' +
         '<ul class="pr-reassure" data-reveal="stagger"><li>' + t('pr.r1') + '</li><li>' + t('pr.r2') + '</li><li>' + t('pr.r3') + '</li></ul>' +
         (guideTab ? '<p class="pr-check" data-reveal="fade">' + t('pr.check') + ' <a class="link-o" href="' + href('identifier', guideTab) + '">' + t('pr.guide') + ' →</a></p>' : '') +
         '</div></div></div></section>' +
 
         (draws.length ? '<section class="sec sec-dark"><div class="wrap"><div class="sec-head sec-head-row"><div>' + eyebrow(t('pr.drawing')) + '<h2 class="h2" data-split>' + esc(p.desig || p.ref) + '</h2></div></div>' +
-          '<div class="draw-pair">' + draws.map(function (svg, i) { return '<figure class="sheet-fig" data-reveal><figcaption class="sheet-tag mono">' + (C().guide.tabs[guideTab] ? C().guide.tabs[guideTab].views[i] : '') + '</figcaption>' + svg + '</figure>'; }).join('') + '</div></div></section>' : '') +
+          '<div class="draw-pair' + (draws.length === 1 || p.type === 'chenille' ? ' draw-one' : '') + '">' + draws.map(function (svg, i) { return '<figure class="sheet-fig" data-reveal><figcaption class="sheet-tag mono">' + (C().guide.tabs[guideTab] ? C().guide.tabs[guideTab].views[i] : p.type === 'brh' ? t('brh.cut') : '') + '</figcaption>' + svg + '</figure>'; }).join('') + '</div></div></section>' : '') +
 
-        '<section class="sec"><div class="wrap pr-tables">' +
+        (p.type === 'brh' ? '' : '<section class="sec"><div class="wrap pr-tables">' +
         '<div><div class="sec-head">' + eyebrow(t('pr.machines')) + '<h2 class="h3" data-split>' + t('pr.machines') + ' · ' + ms.length + '</h2></div>' +
         (ms.length ? machinesTable(ms) : '<p class="muted" data-reveal>' + (p.cls ? t('sp.cls') + ' : ' + esc(p.cls) + '. ' : '') + t('pr.noMachines') + '</p>') +
         '</div>' +
         '<div><div class="sec-head">' + eyebrow(t('pr.cross')) + '<h2 class="h3" data-split>' + t('pr.cross') + '</h2></div>' +
         (cross.length ? '<ul class="xref" data-reveal="stagger">' + cross.map(function (x) { return '<li class="mono">' + esc(x) + '</li>'; }).join('') + '</ul>' : '<p class="muted" data-reveal>' + t('pr.noCross') + '</p>') +
-        '</div></div></section>' +
+        '</div></div></section>') +
 
         (related.length ? '<section class="sec sec-tight"><div class="wrap"><div class="sec-head">' + eyebrow(t('pr.related')) + '<h2 class="h2" data-split>' + t('r.' + catId) + '</h2></div>' +
           '<div class="grid">' + related.map(function (x) { return card(x); }).join('') + '</div></div></section>' : '') +
-        commitments(true);
+        (p.type === 'brh' ? brhParts(p) : '') + commitments(true);
     },
     mount: function (root, r) {
       var p = P[r.param]; if (!p) return;
@@ -956,6 +939,10 @@
       res.list = searchMachine(q.brand, q.model); var m = M[q.model];
       res.title = t('s.machine') + ' ' + esc(m ? m.brand + ' ' + m.model : q.brand); res.pre = { brand: q.brand, model: q.model };
       if (m) res.sub = t('e.' + m.type) + (m.t != null ? ' · ' + num(m.t) + ' t' : '');
+    } else if (q.ton) {
+      var T = parseFloat(String(q.ton).replace(',', '.'));
+      res.list = VT.products.filter(function (p) { return p.type === 'brh' && p.dims && T >= p.dims.tmin && T <= p.dims.tmax; });
+      res.title = t('brh.resT', { t: esc(num(T)) }); res.sub = t('brh.resS'); res.pre = { ton: q.ton };
     } else if (q.w || q.p || q.l) {
       res.list = searchDims(q.type || 'chenille', q.w, q.p, q.l, q.g);
       res.title = t('s.dims'); res.pre = { tab: 'dims', type: q.type, w: q.w, p: q.p, l: q.l, g: q.g };
@@ -970,7 +957,7 @@
       var contactQ = { q: q.q, brand: q.brand, model: q.model, type: q.type, w: q.w, p: q.p, l: q.l, g: q.g };
       return '<section class="pg-hero pg-hero-s"><div class="wrap">' + crumbs([[t('r.search')]]) +
         '<h1 class="pg-title pg-title-s" data-split>' + s.title + '</h1>' + (s.sub ? '<p class="pg-lead mono" data-reveal="fade">' + s.sub + '</p>' : '') +
-        '<div class="cat-qs" data-reveal>' + quickSearch(s.pre) + '</div></div><i class="pg-line" aria-hidden="true"></i></section>' +
+        '<div class="cat-qs" data-reveal>' + (q.ton ? brhSearch(s.pre) : quickSearch(s.pre)) + '</div></div><i class="pg-line" aria-hidden="true"></i></section>' +
         '<section class="sec sec-tight"><div class="wrap">' +
         (s.list.length ? filterBar(s.list, { state: { sub: '', w: '', brand: '', t: '', stock: false }, chips: SEARCH_CHIPS(), chipAttr: 'family' }) + gridHTML()
           : '<div class="noresult" data-reveal><div class="noresult-ic" aria-hidden="true">' + gearIcon() + '</div><h2 class="h3">' + t('s.none') + '</h2><p>' + t('s.noneText') + '</p>' +
@@ -978,7 +965,7 @@
         notFoundLine(contactQ) + '</div></section>';
     },
     mount: function (root, r) {
-      mountQuickSearch(root);
+      mountQuickSearch(root); mountTonSearch(root);
       mountFilters(root, { state: { sub: '', w: '', brand: '', t: '', stock: false }, list: searchResult(r).list, chipAttr: 'family' });
     }
   };
@@ -1100,7 +1087,8 @@
     var p = !i.custom && P[i.id];
     var media = i.custom ? '<span class="ql-ic" aria-hidden="true">' + gearIcon() + '</span>' : (p ? pimg(p) : '');
     var title = i.custom ? t('q.custom') + ' · ' + t('ty.' + i.type) : (p ? '<a href="' + href('product', p.id) + '">' + pname(p) + '</a>' : esc(i.id));
-    var meta = i.custom ? '<p class="ql-ref mono">' + esc(customLabel(i)) + '</p>' : (p ? '<p class="ql-ref mono">' + t('p.ref') + ' ' + esc(p.ref) + '</p>' + avail(p) : '');
+    var meta = i.custom ? '<p class="ql-ref mono">' + esc(customLabel(i)) + '</p>' : (p ? '<p class="ql-ref mono">' + t('p.ref') + ' ' + esc(p.ref) + '</p>' + avail(p) +
+      (p.type === 'brh' && p.dims && p.dims.grease ? '<label class="check ql-opt"><input type="checkbox" data-line-grease' + (i.grease ? ' checked' : '') + '><span class="check-box" aria-hidden="true"></span><span>' + t('brh.optT') + '</span></label>' : '') : '');
     return '<li class="ql" data-line="' + i.id + '"><div class="ql-media">' + media + '</div><div class="ql-body"><p class="ql-t">' + title + '</p>' + meta + '</div>' +
       '<div class="ql-act"><div class="qty qty-s" data-qty><button type="button" data-step="-1" aria-label="' + t('pr.dec') + '">−</button><input type="number" min="1" max="999" value="' + i.qty + '" aria-label="' + t('pr.qty') + '"><button type="button" data-step="1" aria-label="' + t('pr.inc') + '">+</button></div>' +
       '<button type="button" class="ql-rm" data-rm="' + i.id + '" aria-label="' + t('q.remove') + '"><span aria-hidden="true">×</span><span class="ql-rm-t">' + t('q.remove') + '</span></button></div></li>';
@@ -1139,6 +1127,10 @@
       field('plate-' + i.id, t('f.plate') + ' · ' + pname(P[i.id]), { req: true, value: i.plate }) +
       '<label class="check"><input type="checkbox" data-plate-unknown="' + i.id + '"' + (i.plateUnknown ? ' checked' : '') + '><span class="check-box" aria-hidden="true"></span><span>' + t('f.plateUnknown') + '</span></label></div>';
   }
+  function brhPlateFieldset() {
+    if (!S.cart.some(isBrh)) return '';
+    return '<fieldset data-brh-plate><legend class="mini-t">' + t('brh.plateLegend') + '</legend>' + plateBox(true) + '</fieldset>';
+  }
   function platesFieldset() {
     var lines = S.cart.filter(needsPlate);
     if (!lines.length) return '';
@@ -1162,7 +1154,7 @@
       inp.disabled = box.checked; inp.required = !box.checked;
     };
     $$('[data-plate-unknown]', form).forEach(sync);
-    machineRequired(form, S.cart.some(needsPlate));
+    machineRequired(form, needsMachine());
     form.addEventListener('input', function (e) {
       var name = e.target.name || '';
       if (name.indexOf('plate-') !== 0) return;
@@ -1194,11 +1186,10 @@
   function plateRemoved(root, id) {
     var form = $('#qform', root), block = $('[data-plate="' + id + '"]', root);
     if (block) block.remove();
-    if (form && !S.cart.some(needsPlate)) {
-      var set = $('[data-plates]', form);
-      if (set) set.remove();
-      machineRequired(form, false);
-    }
+    if (!form) return;
+    if (!S.cart.some(needsPlate)) { var set = $('[data-plates]', form); if (set) set.remove(); }
+    if (!S.cart.some(isBrh)) { var bset = $('[data-brh-plate]', form); if (bset) bset.remove(); }
+    machineRequired(form, needsMachine());
   }
   V.devis = {
     html: function () {
@@ -1212,7 +1203,7 @@
         '<p class="pg-lead" data-reveal>' + t('q.sub') + '</p>' + stepsBar(1) + '</div></section>' +
         '<section class="sec sec-tight"><div class="wrap quote-grid"><div class="quote-main">' +
         '<h2 class="mini-t">' + t('q.items') + '</h2><ul class="qlist" data-qlist>' + S.cart.map(lineHTML).join('') + '</ul>' +
-        '<form class="qform" id="qform" data-form="quote" novalidate>' + platesFieldset() +
+        '<form class="qform" id="qform" data-form="quote" novalidate>' + platesFieldset() + brhPlateFieldset() +
         '<fieldset><legend class="mini-t">' + t('q.form') + '</legend><div class="ff-grid">' +
         field('company', t('f.company'), { req: true, auto: 'organization' }) + field('name', t('f.name'), { req: true, auto: 'name' }) +
         field('email', t('f.email'), { req: true, type: 'email', auto: 'email' }) + field('phone', t('f.phone'), { req: true, type: 'tel', auto: 'tel' }) +
@@ -1263,6 +1254,7 @@
         list.addEventListener('change', function (e) {
           var inp = e.target.closest('input'); if (!inp) return;
           var li = inp.closest('[data-line]'), line = S.cart.filter(function (x) { return x.id === li.getAttribute('data-line'); })[0];
+          if (inp.hasAttribute('data-line-grease')) { line.grease = inp.checked; store.set('vt.quote', S.cart); return; }
           line.qty = Math.max(1, Math.min(999, parseInt(inp.value, 10) || 1)); inp.value = line.qty; saveCart(); refreshSummary(root);
         });
       }
@@ -1302,6 +1294,7 @@
       if (i.custom) return { custom: true, type: i.type, dims: i.dims, qty: i.qty };
       var o = { id: i.id, qty: i.qty, label: lineLabel(i) };
       if (needsPlate(i)) { o.plate = String(i.plate || '').trim(); o.plate_unknown = !!i.plateUnknown; }
+      if (hasGrease(i)) o.grease = true;
       return o;
     })));
     var demo = function () { return { ok: true, demo: true }; };
@@ -1372,7 +1365,7 @@
       var req = {
         kind: kind, num: 'VT-' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
         name: String(data.get('name') || '').trim().split(' ')[0], email: String(data.get('email') || '').trim(), lang: S.lang,
-        items: kind === 'quote' ? S.cart.map(function (i) { return { label: lineLabel(i) + (needsPlate(i) ? ' · ' + t('q.plateLabel') + ' ' + plateText(i) : ''), qty: i.qty }; }) : [],
+        items: kind === 'quote' ? S.cart.map(function (i) { return { label: lineLabel(i) + (needsPlate(i) ? ' · ' + t('q.plateLabel') + ' ' + plateText(i) : '') + (hasGrease(i) ? ' · ' + t('brh.optT') : ''), qty: i.qty }; }) : [],
         photos: files.length, at: d.toISOString()
       };
       if (data.get('website')) { done(); return; } // anti-spam : envoi ignoré
@@ -1424,14 +1417,14 @@
 
   V.contact = {
     html: function (r) {
-      var q = r.query, m = M[q.model];
+      var q = r.query, m = M[q.model], pf = r.route === 'platine';
       var dims = [];
       if (q.type) dims.push(t('ty.' + (q.type === 'patins' ? 'patins' : q.type)));
       if (q.w) dims.push(t('qs.width') + ' ' + q.w); if (q.p) dims.push(t('qs.pitch') + ' ' + q.p); if (q.l) dims.push(t('qs.links') + ' ' + q.l);
       if (q.q) dims.push('« ' + q.q + ' »');
-      var pref = dims.length || m || q.brand;
-      return '<section class="pg-hero pg-hero-s"><div class="wrap">' + crumbs([[t('r.contact')]]) + '<h1 class="pg-title" data-split>' + t('ct.title') + '</h1>' +
-        '<p class="pg-lead" data-reveal>' + t('ct.sub') + '</p></div><i class="pg-line" aria-hidden="true"></i></section>' +
+      var pref = !pf && (dims.length || m || q.brand || q.msg);
+      return '<section class="pg-hero pg-hero-s"><div class="wrap">' + crumbs([[t(pf ? 'r.platine' : 'r.contact')]]) + '<h1 class="pg-title" data-split>' + t(pf ? 'pf.title' : 'ct.title') + '</h1>' +
+        '<p class="pg-lead" data-reveal>' + t(pf ? 'pf.sub' : 'ct.sub') + '</p></div><i class="pg-line" aria-hidden="true"></i></section>' +
         '<section class="sec sec-tight"><div class="wrap contact-grid">' +
         '<aside class="contact-side" data-reveal="stagger">' +
         '<a class="contact-card contact-phone" href="tel:' + VT.config.phoneHref + '"><span class="mini-t">' + t('ct.phone') + '</span><b class="mono">' + VT.config.phone + '</b></a>' +
@@ -1444,8 +1437,9 @@
         field('company', t('f.company'), { auto: 'organization' }) + field('name', t('f.name'), { req: true, auto: 'name' }) +
         field('email', t('f.email'), { req: true, type: 'email', auto: 'email' }) + field('phone', t('f.phone'), { req: true, type: 'tel', auto: 'tel' }) +
         field('brand', t('f.brand'), { select: brandSelect(m ? m.brand : q.brand) }) + field('model', t('f.model'), { value: m ? m.model : '' }) +
-        field('dims', t('f.dims'), { wide: true, value: dims.join(' · ') }) + photosField() +
-        field('message', t('f.message'), { textarea: true, wide: true }) + '</div>' +
+        field('dims', pf ? t('pf.coupler') : t('f.dims'), { wide: true, value: pf ? '' : dims.join(' · ') }) + photosField() +
+        field('message', t('f.message'), { textarea: true, wide: true, value: pf ? t('pf.msg', { num: q.num || '—' }) : (q.msg || '') }) + '</div>' +
+        (pf ? '<input type="hidden" name="topic" value="platine"><input type="hidden" name="quote_ref" value="' + esc(q.num || '') + '">' : '') +
         '<div class="hp" aria-hidden="true"><label>' + t('f.hp') + '<input name="website" tabindex="-1" autocomplete="off"></label></div>' +
         '<div class="consents" data-reveal><label class="check check-l"><input type="checkbox" name="rgpd" required><span class="check-box" aria-hidden="true"></span><span>' + t('f.rgpd', { legal: href('legal') }) + '</span><span class="ff-err" aria-live="polite"></span></label></div>' +
         '<p class="form-msg" data-form-msg role="alert" hidden></p>' +
@@ -1454,6 +1448,7 @@
     },
     mount: function (root) { mountForm(root, 'info'); }
   };
+  V.platine = V.contact;
 
   V.about = {
     html: function () {
@@ -1678,7 +1673,8 @@
         var q = 1;
         if (add.hasAttribute('data-add-qty')) { var qi = $('[data-qty] input', add.closest('.pr-info') || document); q = parseInt(qi && qi.value, 10) || 1; }
         var card = add.closest('.pcard'), src = card ? $('.pcard-media img', card) : $('.pr-photo img');
-        addToCart(add.getAttribute('data-add'), q, src || add);
+        var gr = $('[data-grease]', add.closest('.pr-info') || document);
+        addToCart(add.getAttribute('data-add'), q, src || add, { grease: !!(gr && gr.checked && add.hasAttribute('data-add-qty')) });
         return;
       }
       var lg = e.target.closest('[data-lang]');

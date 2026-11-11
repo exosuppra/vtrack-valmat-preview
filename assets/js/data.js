@@ -28,6 +28,7 @@ VT.routes = {
   stock:        { fr: 'stock-et-promos',      en: 'stock-and-deals' },
   product:      { fr: 'produit',              en: 'product' },
   search:       { fr: 'recherche',            en: 'search' },
+  platine:      { fr: 'demande-de-platine',   en: 'plate-request' },
   devis:        { fr: 'ma-demande',           en: 'my-quote' },
   confirmation: { fr: 'demande-envoyee',      en: 'request-sent' },
   contact:      { fr: 'contact',              en: 'contact' },
@@ -126,9 +127,7 @@ VT.products = [
     img: 'pad.jpg', stock: false, machines: ['kubota-kx080-4', 'takeuchi-tb290', 'volvo-ecr88'], weight: 4.3 },
 
   { id: 'tariere-mini-pelle', type: 'tariere', ref: 'VT-TAR', img: null, stock: false,
-    machines: ['kubota-kx016-4', 'kubota-u27-4', 'takeuchi-tb230', 'yanmar-vio26', 'bobcat-e35'] },
-  { id: 'brh-mini-pelle', type: 'brh', ref: 'VT-BRH', img: null, stock: false,
-    machines: ['kubota-u35-4', 'kubota-kx057-4', 'takeuchi-tb260', 'volvo-ecr58'] }
+    machines: ['kubota-kx016-4', 'kubota-u27-4', 'takeuchi-tb230', 'yanmar-vio26', 'bobcat-e35'] }
 ];
 
 /* ---------------------------------------------------------------- textes */
@@ -224,6 +223,27 @@ VT.i18n = {
     'f.send': 'Envoyer ma demande', 'f.sending': 'Envoi…', 'f.required': 'Champ obligatoire', 'f.invalidEmail': 'Adresse e-mail invalide',
     'f.mustCheck': 'Merci de cocher cette case', 'f.dims': 'Dimensions connues', 'f.message': 'Message', 'f.optional': 'facultatif',
     'f.hp': 'Ne pas remplir ce champ',
+    'brh.carrier': 'Pelle porteuse', 'brh.oil': "Débit d'huile", 'brh.pressure': 'Pression de service', 'brh.freq': 'Fréquence de frappe',
+    'brh.energy': 'Énergie de frappe', 'brh.hose': 'Diamètre des flexibles', 'brh.tool': "Diamètre de l'outil", 'brh.grease': 'Graissage automatique',
+    'brh.greaseYes': 'En option', 'brh.greaseNo': 'Non disponible', 'brh.fit': 'Pelle de {a} à {b} t',
+    'brh.optT': 'Option graissage automatique', 'brh.optS': 'Centrale de graissage montée sur le BRH. Photo non contractuelle.',
+    'brh.plateT': 'Une platine adaptée à votre attache rapide', 'brh.plateLegend': 'Platine de votre BRH',
+    'brh.plateText': "Pour équiper votre pelle d'un brise-roche, la platine du BRH doit correspondre à l'attache rapide du porteur. Valmat vous fournit la platine adaptée à votre machine.",
+    'brh.plateCheck': 'Recevoir le formulaire de demande de platine',
+    'brh.cut': 'VUE EN COUPE · SÉRIE HB', 'brh.cutAlt': 'Vue en coupe du brise-roche hydraulique',
+    'brh.c.rear': 'Tête arrière', 'brh.c.rod': 'Tirant', 'brh.c.valve': 'Distributeur', 'brh.c.cyl': 'Cylindre', 'brh.c.acc': 'Accumulateur',
+    'brh.c.piston': 'Piston', 'brh.c.front': 'Tête avant', 'brh.c.pin': 'Clavette', 'brh.c.tool': 'Outil',
+    'brh.partsEyebrow': 'Pièces détachées', 'brh.partsTitle': 'Pièces détachées spécial BRH',
+    'brh.partsText': "Pièces d'origine pour brise-roche VHB. Dites-nous la pièce et le modèle de votre BRH : nous revenons vers vous avec un prix et un délai.",
+    'brh.partsCta': 'Nous contacter pour une pièce détachée', 'brh.partsMsg': 'Pièces détachées pour le BRH {ref} : ',
+    'brh.p.corps': 'Corps complet', 'brh.p.tete-arriere': 'Tête arrière', 'brh.p.tete-avant': 'Tête avant', 'brh.p.cylindre': 'Cylindre', 'brh.p.piston': 'Piston',
+    'brh.p.bagues-usure': "Bagues d'usure", 'brh.p.bague-butee': 'Bague de butée', 'brh.p.clavettes': 'Clavettes', 'brh.p.tirants': 'Tirants',
+    'brh.p.boulons-lateraux': 'Boulons latéraux', 'brh.p.outils': 'Outils', 'brh.p.axes': 'Axes', 'brh.p.distributeur': 'Distributeur',
+    'brh.p.joints': 'Pochettes de joints', 'brh.p.caisse-outils': 'Caisse à outils', 'brh.p.accumulateur': 'Accumulateur',
+    'brh.searchT': 'Trouver un BRH selon le tonnage de votre pelle', 'brh.searchL': 'Tonnage de la pelle (t)',
+    'brh.resT': 'BRH pour une pelle de {t} t', 'brh.resS': 'Brise-roches hydrauliques adaptés au poids du porteur',
+    'pf.title': 'Demande de platine', 'pf.coupler': "Attache rapide de votre pelle (marque, modèle)", 'pf.msg': 'Demande de platine pour le devis {num}.',
+    'pf.sub': "Indiquez votre pelle et son attache rapide : nous vous proposons la platine adaptée à votre brise-roche. Une photo de l'attache rapide nous aide beaucoup.",
     'f.plate': 'Type de platine voulu', 'f.plateUnknown': 'Je ne connais pas le type, à définir avec un conseiller',
     'q.plateT': 'Platine de fixation', 'q.plateHint': 'La platine doit être compatible avec votre machine. Indiquez le type voulu, puis la marque et le modèle de la machine plus bas.',
     'q.plateLabel': 'Platine :', 'q.plateUnknown': 'à définir avec un conseiller',
@@ -251,13 +271,13 @@ VT.i18n = {
     'tt.added': 'Ajouté à votre demande', 'tt.view': 'Voir', 'tt.removed': 'Retiré de votre demande', 'tt.custom': 'Pièce sur cotes ajoutée',
     'r.home': 'Accueil', 'r.chenilles': 'Chenilles caoutchouc', 'r.patins': 'Patins et surpatins', 'r.identifier': 'Identifier ma pièce',
     'r.autres': 'Autres produits', 'r.stock': 'Stock et promos', 'r.devis': 'Ma demande de devis', 'r.confirmation': 'Demande envoyée',
-    'r.contact': 'Contact', 'r.about': 'À propos', 'r.conseils': 'Conseils et FAQ', 'r.legal': 'Informations légales', 'r.search': 'Recherche',
+    'r.contact': 'Contact', 'r.platine': 'Demande de platine', 'r.about': 'À propos', 'r.conseils': 'Conseils et FAQ', 'r.legal': 'Informations légales', 'r.search': 'Recherche',
     'r.product': 'Fiche produit', 'r.404': 'Page introuvable',
     'e.mini': 'Mini-pelle', 'e.pelle': 'Pelle', 'e.chargeuse': 'Chargeuse compacte', 'e.dumper': 'Dumper',
     'ty.chenille': 'Chenille caoutchouc', 'ty.roadliner': 'Pad Roadliner', 'ty.clipon': 'Surpatin à clipser', 'ty.bolton': 'Surpatin à boulonner',
     'ty.tariere': 'Tarière', 'ty.brh': 'Brise-roche hydraulique', 'ty.patins': 'Patin',
     'n.chenille': 'Chenille {d}', 'n.roadliner': 'Pad Roadliner {d}', 'n.clipon': 'Surpatin à clipser {d}', 'n.bolton': 'Surpatin à boulonner {d}',
-    'n.tariere': 'Tarière pour mini-pelle', 'n.brh': 'Brise-roche hydraulique (BRH)',
+    'n.tariere': 'Tarière pour mini-pelle', 'n.brh': 'Brise-roche hydraulique {d}',
     'nf.text': "Cette page n'existe pas ou a changé d'adresse.", 'nf.back': "Revenir à l'accueil"
   },
   en: {
@@ -351,6 +371,27 @@ VT.i18n = {
     'f.send': 'Send my request', 'f.sending': 'Sending…', 'f.required': 'Required field', 'f.invalidEmail': 'Invalid email address',
     'f.mustCheck': 'Please tick this box', 'f.dims': 'Known measurements', 'f.message': 'Message', 'f.optional': 'optional',
     'f.hp': 'Leave this field empty',
+    'brh.carrier': 'Carrier excavator', 'brh.oil': 'Oil flow', 'brh.pressure': 'Operating pressure', 'brh.freq': 'Impact rate',
+    'brh.energy': 'Impact energy', 'brh.hose': 'Hose diameter', 'brh.tool': 'Tool diameter', 'brh.grease': 'Automatic greasing',
+    'brh.greaseYes': 'Optional', 'brh.greaseNo': 'Not available', 'brh.fit': 'Excavator {a} to {b} t',
+    'brh.optT': 'Automatic greasing option', 'brh.optS': 'Grease unit fitted on the breaker. Non-contractual photo.',
+    'brh.plateT': 'A plate that fits your quick coupler', 'brh.plateLegend': 'Your breaker plate',
+    'brh.plateText': "To fit a breaker on your excavator, the breaker plate must match the carrier's quick coupler. Valmat supplies the plate that fits your machine.",
+    'brh.plateCheck': 'Receive the plate request form',
+    'brh.cut': 'CUTAWAY VIEW · HB SERIES', 'brh.cutAlt': 'Cutaway view of the hydraulic breaker',
+    'brh.c.rear': 'Back head', 'brh.c.rod': 'Through bolt', 'brh.c.valve': 'Control valve', 'brh.c.cyl': 'Cylinder', 'brh.c.acc': 'Accumulator',
+    'brh.c.piston': 'Piston', 'brh.c.front': 'Front head', 'brh.c.pin': 'Rod pin', 'brh.c.tool': 'Tool',
+    'brh.partsEyebrow': 'Spare parts', 'brh.partsTitle': 'Breaker spare parts',
+    'brh.partsText': 'Genuine parts for VHB breakers. Tell us the part and your breaker model: we come back with a price and a lead time.',
+    'brh.partsCta': 'Contact us about a spare part', 'brh.partsMsg': 'Spare parts for breaker {ref}: ',
+    'brh.p.corps': 'Complete body', 'brh.p.tete-arriere': 'Back head', 'brh.p.tete-avant': 'Front head', 'brh.p.cylindre': 'Cylinder', 'brh.p.piston': 'Piston',
+    'brh.p.bagues-usure': 'Wear bushings', 'brh.p.bague-butee': 'Thrust ring', 'brh.p.clavettes': 'Rod pins', 'brh.p.tirants': 'Through bolts',
+    'brh.p.boulons-lateraux': 'Side bolts', 'brh.p.outils': 'Tools', 'brh.p.axes': 'Pins', 'brh.p.distributeur': 'Control valve',
+    'brh.p.joints': 'Seal kits', 'brh.p.caisse-outils': 'Tool box', 'brh.p.accumulateur': 'Accumulator',
+    'brh.searchT': 'Find a breaker for your excavator weight', 'brh.searchL': 'Excavator weight (t)',
+    'brh.resT': 'Breakers for a {t} t excavator', 'brh.resS': 'Hydraulic breakers matching the carrier weight',
+    'pf.title': 'Plate request', 'pf.coupler': 'Your excavator quick coupler (brand, model)', 'pf.msg': 'Plate request for quote {num}.',
+    'pf.sub': 'Tell us about your excavator and its quick coupler: we offer the plate that fits your breaker. A photo of the quick coupler helps a lot.',
     'f.plate': 'Plate type wanted', 'f.plateUnknown': "I don't know the type, to be defined with an advisor",
     'q.plateT': 'Mounting plate', 'q.plateHint': "The plate must fit your machine. Enter the type you want, then the machine's brand and model further down.",
     'q.plateLabel': 'Plate:', 'q.plateUnknown': 'to be defined with an advisor',
@@ -378,13 +419,13 @@ VT.i18n = {
     'tt.added': 'Added to your request', 'tt.view': 'View', 'tt.removed': 'Removed from your request', 'tt.custom': 'Custom part added',
     'r.home': 'Home', 'r.chenilles': 'Rubber tracks', 'r.patins': 'Track pads', 'r.identifier': 'Identify my part',
     'r.autres': 'Other products', 'r.stock': 'Stock & deals', 'r.devis': 'My quote request', 'r.confirmation': 'Request sent',
-    'r.contact': 'Contact', 'r.about': 'About', 'r.conseils': 'Advice & FAQ', 'r.legal': 'Legal information', 'r.search': 'Search',
+    'r.contact': 'Contact', 'r.platine': 'Plate request', 'r.about': 'About', 'r.conseils': 'Advice & FAQ', 'r.legal': 'Legal information', 'r.search': 'Search',
     'r.product': 'Product', 'r.404': 'Page not found',
     'e.mini': 'Mini excavator', 'e.pelle': 'Excavator', 'e.chargeuse': 'Compact track loader', 'e.dumper': 'Tracked dumper',
     'ty.chenille': 'Rubber track', 'ty.roadliner': 'Roadliner pad', 'ty.clipon': 'Clip-on pad', 'ty.bolton': 'Bolt-on pad',
     'ty.tariere': 'Earth auger', 'ty.brh': 'Hydraulic breaker', 'ty.patins': 'Pad',
     'n.chenille': 'Rubber track {d}', 'n.roadliner': 'Roadliner pad {d}', 'n.clipon': 'Clip-on pad {d}', 'n.bolton': 'Bolt-on pad {d}',
-    'n.tariere': 'Earth auger for mini excavators', 'n.brh': 'Hydraulic breaker',
+    'n.tariere': 'Earth auger for mini excavators', 'n.brh': 'Hydraulic breaker {d}',
     'nf.text': 'This page does not exist or has moved.', 'nf.back': 'Back to home'
   }
 };
@@ -397,7 +438,7 @@ VT.content = {
         subs: [['mini', 'Mini-pelle'], ['pelle', 'Pelles'], ['chargeuse', 'Chargeuse compacte'], ['dumper', 'Dumper'], ['autre', 'Autres engins']] },
       patins: { img: 'door-patins.jpg', intro: "Pads Roadliner qui remplacent la tuile, surpatins à clipser sans perçage, surpatins à boulonner sur la tuile acier. Pour rouler sur l'enrobé et protéger la voirie.",
         subs: [['roadliner', 'Pads Roadliner'], ['clipon', 'Surpatins à clipser'], ['bolton', 'Surpatins à boulonner']] },
-      autres: { img: 'dust.jpg', intro: 'Tarières et brise-roches hydrauliques (BRH) pour mini-pelles et pelles. Même principe : ajoutez à votre demande, on revient vers vous avec un prix et un délai.',
+      autres: { img: 'dust.jpg', intro: 'Brise-roches hydrauliques insonorisés VHB pour pelles de 0,6 à 120 t, et tarières. Cherchez votre BRH selon le tonnage de votre pelle, ajoutez-le à votre demande : on revient vers vous avec un prix et un délai.',
         subs: [['tariere', 'Tarières'], ['brh', 'BRH']] },
       stock: { img: 'pretes.jpg', intro: "Les références disponibles tout de suite, les promotions et le déstockage du moment. Toutes les autres restent demandables en devis." }
     },
@@ -441,7 +482,7 @@ VT.content = {
         clipon: {
           label: 'Surpatin à clipser', short: 'Clip-On',
           lead: 'Se clipse sur la tuile acier. Pas de perçage.',
-          views: ['VUE DE DESSUS, POSÉ SUR LA TUILE', 'VUE DE CÔTÉ, PATIN VERS LE HAUT'],
+          views: ['VUE DE DESSUS, POSÉ SUR LA TUILE', 'VUE DE CÔTÉ, MONTÉ SUR LA CHAÎNE'],
           steps: [
             'Mesurez le <b>pas P</b> et la <b>largeur de la tuile</b>. La largeur de la tuile donne L.',
             "Mesurez l'<b>arête</b> de la tuile : sa largeur (comparée à W1) et sa hauteur (comparée à H1). Elle doit rentrer dans le logement du patin sans jeu ni forçage.",
@@ -454,7 +495,7 @@ VT.content = {
         bolton: {
           label: 'Surpatin à boulonner', short: 'Bolt-On',
           lead: "Se boulonne sur la tuile acier, qu'on garde. Il faut percer la tuile.",
-          views: ['FACE DU PATIN COLLÉE À LA TUILE', 'COUPE DANS LE SENS DE MARCHE'],
+          views: ['FACE DU PATIN COLLÉE À LA TUILE', 'VUE DE CÔTÉ, MONTÉ SUR LA CHAÎNE'],
           steps: [
             'Mesurez le <b>pas P</b> et la <b>largeur de la tuile</b> acier. Ces deux cotes suffisent pour choisir la référence.',
             'Vérifiez que les têtes des boulons de chaîne tombent dans les <b>lumières</b> du patin. B et C sont les entraxes des deux rangées de boulons, en travers. D et E sont les écarts entre ces rangées, côté droit et côté gauche.',
@@ -503,7 +544,7 @@ VT.content = {
         subs: [['mini', 'Mini excavator'], ['pelle', 'Excavators'], ['chargeuse', 'Compact track loader'], ['dumper', 'Dumper'], ['autre', 'Other machines']] },
       patins: { img: 'door-patins.jpg', intro: 'Roadliner pads that replace the steel shoe, clip-on pads with no drilling, bolt-on pads fixed to the steel shoe. To drive on asphalt and protect roads.',
         subs: [['roadliner', 'Roadliner pads'], ['clipon', 'Clip-on pads'], ['bolton', 'Bolt-on pads']] },
-      autres: { img: 'dust.jpg', intro: 'Earth augers and hydraulic breakers for mini excavators and excavators. Same principle: add them to your request, we reply with a price and a lead time.',
+      autres: { img: 'dust.jpg', intro: 'VHB silenced hydraulic breakers for excavators from 0.6 to 120 t, and earth augers. Find your breaker by your excavator weight, add it to your request: we reply with a price and a lead time.',
         subs: [['tariere', 'Earth augers'], ['brh', 'Breakers']] },
       stock: { img: 'pretes.jpg', intro: 'References available right now, current deals and clearance. Every other reference can still be quoted.' }
     },
@@ -547,7 +588,7 @@ VT.content = {
         clipon: {
           label: 'Clip-on pad', short: 'Clip-On',
           lead: 'Clips onto the steel shoe. No drilling.',
-          views: ['TOP VIEW, ON THE SHOE', 'SIDE VIEW, PAD FACING UP'],
+          views: ['TOP VIEW, ON THE SHOE', 'SIDE VIEW, FITTED ON THE CHAIN'],
           steps: [
             'Measure <b>pitch P</b> and <b>shoe width</b>. The shoe width gives L.',
             'Measure the shoe <b>grouser</b>: its width (vs W1) and height (vs H1). It must sit in the pad slot without play or forcing.',
@@ -560,7 +601,7 @@ VT.content = {
         bolton: {
           label: 'Bolt-on pad', short: 'Bolt-On',
           lead: 'Bolts onto the steel shoe, which you keep. The shoe must be drilled.',
-          views: ['PAD FACE AGAINST THE SHOE', 'SECTION IN TRAVEL DIRECTION'],
+          views: ['PAD FACE AGAINST THE SHOE', 'SIDE VIEW, FITTED ON THE CHAIN'],
           steps: [
             'Measure <b>pitch P</b> and the steel <b>shoe width</b>. These two values are enough to pick the reference.',
             'Check that the chain bolt heads fall into the pad <b>slots</b>. B and C are the spacings of the two bolt rows, across. D and E are the distances between these rows, right and left side.',
