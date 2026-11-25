@@ -1465,6 +1465,21 @@
     }
   };
 
+  // FAQ : catégories en accordéon (3e colonne de chaque question), réponses sur plusieurs lignes, {email} = e-mail de contact
+  function faqAnswer(a) {
+    var mail = VT.config.email ? '<a class="link-o" href="mailto:' + esc(VT.config.email) + '">' + esc(VT.config.email) + '</a>' : '';
+    return String(a || '').replace(/\{email\}/g, mail).replace(/\n/g, '<br>');
+  }
+  function faqHTML(faq) {
+    var cats = [], by = {};
+    faq.forEach(function (f) { var c = f[2] || ''; if (!by[c]) { by[c] = []; cats.push(c); } by[c].push(f); });
+    var qa = function (list) { return list.map(function (f) { return '<div class="faq-qa"><h3>' + f[0] + '</h3><p>' + faqAnswer(f[1]) + '</p></div>'; }).join(''); };
+    return '<div class="faq" data-reveal="stagger">' + cats.map(function (c, i) {
+      if (!c) return by[c].map(function (f) { return '<details class="faq-i"><summary><span>' + f[0] + '</span><i aria-hidden="true"></i></summary><div class="faq-a"><p>' + faqAnswer(f[1]) + '</p></div></details>'; }).join('');
+      return '<details class="faq-cat"><summary><span class="faq-cat-n mono">0' + (i + 1) + '</span><span class="faq-cat-t">' + c + '</span>' +
+        '<span class="faq-cat-c mono">' + t('faq.count', { n: by[c].length }) + '</span><i aria-hidden="true"></i></summary><div class="faq-a">' + qa(by[c]) + '</div></details>';
+    }).join('') + '</div>';
+  }
   V.conseils = {
     html: function () {
       var g = C().guide, faq = C().faq;
@@ -1474,16 +1489,14 @@
           return '<a class="guide-card" href="' + href('identifier', k) + '"><span class="mono">0' + i + '</span><b>' + g.tabs[k].label + '</b><span>' + g.tabs[k].lead + '</span><i aria-hidden="true">→</i></a>';
         }).join('') + '</div></div></section>' +
         '<section class="sec"><div class="wrap faq-wrap"><div class="sec-head">' + eyebrow('FAQ') + '<h2 class="h2" data-split>' + (S.lang === 'fr' ? 'Questions fréquentes' : 'Frequently asked questions') + '</h2></div>' +
-        '<div class="faq" data-reveal="stagger">' + faq.map(function (f) {
-          return '<details class="faq-i"><summary><span>' + f[0] + '</span><i aria-hidden="true"></i></summary><div class="faq-a"><p>' + f[1] + '</p></div></details>';
-        }).join('') + '</div></div></section>' + ctaBlock();
+        faqHTML(faq) + '</div></section>' + ctaBlock();
     },
     mount: function (root) {
-      $$('details.faq-i', root).forEach(function (d) {
+      $$('details.faq-i, details.faq-cat', root).forEach(function (d) {
         var s = $('summary', d), a = $('.faq-a', d);
         s.addEventListener('click', function (e) { if (window.Motion) { e.preventDefault(); Motion.accordion(d, a); } });
       });
-      setLd({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: C().faq.map(function (f) { return { '@type': 'Question', name: f[0], acceptedAnswer: { '@type': 'Answer', text: f[1] } }; }) });
+      setLd({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: C().faq.map(function (f) { return { '@type': 'Question', name: f[0], acceptedAnswer: { '@type': 'Answer', text: faqAnswer(f[1]).replace(/<[^>]+>/g, ' ') } }; }) });
     }
   };
 
