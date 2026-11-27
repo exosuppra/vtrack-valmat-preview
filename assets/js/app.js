@@ -277,7 +277,7 @@
       if (!x.dims) return false;
       if (type === 'chenille') {
         if (x.type !== 'chenille') return false;
-        return (isNaN(W) || near(x.dims.w, W)) && (isNaN(Pp) || near(x.dims.p, Pp)) && (isNaN(Ll) || near(x.dims.l, Ll)) && (!g || x.dims.g === g);
+        return (isNaN(W) || near(x.dims.w, W)) && (isNaN(Pp) || near(x.dims.p, Pp)) && (isNaN(Ll) || near(x.dims.l, Ll)) && (!g || (g === '0' ? !x.dims.g : x.dims.g === g));
       }
       if (PAD_TYPES.indexOf(x.type) < 0) return false;
       if (type && type !== 'patins' && x.type !== type) return false;
@@ -364,47 +364,21 @@
   function svgWrap(vb, inner, label, extra) {
     return '<svg class="draw" viewBox="' + vb + '" role="img" aria-label="' + esc(label) + '" data-draw' + (extra || '') + '>' + inner + '</svg>';
   }
+  // Schéma coté fourni par Valmat (assets/js/schemas.js) : l'image sans ses valeurs, les cotes du produit en texte SVG
+  function schemaSVG(key, d, L, label) {
+    var S = window.VT_SCHEMAS && VT_SCHEMAS[key]; if (!S) return '';
+    var tx = S.labels.map(function (o) {
+      var inner = o.k === 'bolt' ? esc(L.holes + ' (' + (d.bolt || 'M12') + ')')
+        : o.p + ' = <tspan data-v="' + o.k + '">' + (d[o.k] == null || d[o.k] === '' ? '?' : num(d[o.k])) + '</tspan>';
+      return '<g class="dim" data-dim="' + o.k + '"><text class="' + (o.w ? 'dtw' : 'dtv') + '" x="' + o.x + '" y="' + o.y + '" font-size="' + o.s + '" text-anchor="middle" dominant-baseline="central"' +
+        (o.v ? ' transform="rotate(-90 ' + o.x + ' ' + o.y + ')"' : '') + '>' + inner + '</text></g>';
+    }).join('');
+    return svgWrap('0 0 ' + S.w + ' ' + S.h, '<image class="sch-img" href="' + S.img + '" width="' + S.w + '" height="' + S.h + '"/>' + tx, label);
+  }
   var DRAW = {
-    roadlinerBottom: function (d, L) {
-      return svgWrap('0 0 560 300',
-        '<text class="lbl" x="270" y="18" text-anchor="middle">' + L.travel + '</text>' +
-        '<rect class="part" x="60" y="80" width="420" height="130" rx="10"/>' +
-        '<path class="guide" d="M224 118L238 168M336 118L322 168"/>' +
-        hole(224, 118) + hole(336, 118) + hole(238, 168) + hole(322, 168) +
-        '<path class="call" d="M336 118L380 72H390"/><text class="lbl" x="394" y="77">' + L.holes + ' (' + (d.bolt || 'M12') + ')</text>' +
-        dimH(224, 336, 56, 'A', d.A, { ext: [[224, 62, 224, 108], [336, 62, 336, 108]] }) +
-        dimH(238, 322, 240, 'B', d.B, { ext: [[238, 178, 238, 246], [322, 178, 322, 246]] }) +
-        dimV(190, 118, 168, 'C', d.C, { ext: [[213, 118, 184, 118], [227, 168, 184, 168]] }) +
-        dimH(60, 480, 280, 'L', d.L, { ext: [[60, 212, 60, 286], [480, 212, 480, 286]] }) +
-        dimV(512, 80, 210, 'l', d.l, { side: 'r', ext: [[482, 80, 518, 80], [482, 210, 518, 210]] }),
-        'Roadliner, ' + L.travel);
-    },
-    boltFace: function (d, L) {
-      var slot = function (cx, cy) { return '<rect class="slot" x="' + (cx - 13) + '" y="' + (cy - 7) + '" width="26" height="14" rx="5"/>'; };
-      return svgWrap('0 0 560 300',
-        '<rect class="part" x="60" y="92" width="420" height="116" rx="8"/>' +
-        hole(88, 150) + hole(452, 150) + slot(244, 128) + slot(316, 128) + slot(230, 172) + slot(330, 172) +
-        dimH(88, 452, 34, 'A', d.A, { ext: [[88, 40, 88, 140], [452, 40, 452, 140]] }) +
-        dimH(244, 316, 72, 'B', d.B, { ext: [[244, 78, 244, 120], [316, 78, 316, 120]] }) +
-        dimH(230, 330, 240, 'C', d.C, { ext: [[230, 180, 230, 246], [330, 180, 330, 246]] }) +
-        dimV(376, 128, 172, 'D', d.D, { side: 'r', ext: [[330, 128, 382, 128], [344, 172, 382, 172]] }) +
-        dimV(186, 128, 172, 'E', d.E, { ext: [[230, 128, 180, 128], [216, 172, 180, 172]] }) +
-        dimH(60, 480, 280, 'L', d.L, { ext: [[60, 210, 60, 286], [480, 210, 480, 286]] }) +
-        dimV(512, 92, 208, 'l', d.l, { side: 'r', ext: [[482, 92, 518, 92], [482, 208, 518, 208]] }),
-        'Bolt-On, ' + L.slots);
-    },
-    clipTop: function (d, L) {
-      var clip = function (x) { return '<rect class="clip" x="' + x + '" y="52" width="37" height="134" rx="3"/>'; };
-      return svgWrap('0 0 560 260',
-        '<rect class="tile-d" x="48" y="44" width="444" height="150" rx="6"/>' +
-        '<rect class="part" x="75" y="56" width="390" height="126"/>' +
-        clip(55) + clip(448) +
-        '<text class="lbl lbl-c" x="270" y="124" text-anchor="middle">' + L.nodrill + '</text>' +
-        '<path class="call" d="M466 52L448 26H330"/><text class="lbl" x="330" y="20">' + L.clips + '</text>' +
-        dimH(60, 480, 228, 'L', d.L, { ext: [[60, 188, 60, 234], [480, 188, 480, 234]] }) +
-        dimV(516, 56, 182, 'W', d.W, { side: 'r', ext: [[487, 56, 522, 56], [487, 182, 522, 182]] }),
-        'Clip-On, ' + L.nodrill);
-    },
+    roadlinerBottom: function (d, L) { return schemaSVG('roadliner', d, L, 'Roadliner, ' + L.travel); },
+    boltFace: function (d, L) { return schemaSVG('bolton', d, L, 'Bolt-On, ' + L.slots); },
+    clipTop: function (d, L) { return schemaSVG('clipon', d, L, 'Clip-On, ' + L.nodrill); },
     pitch: function () {
       var axes = [70, 190, 310, 430, 550], br = '', i;
       for (i = 0; i < 4; i++) {
@@ -421,6 +395,11 @@
   };
   // Schémas fournis par Valmat : vues de côté des patins, chenille vue de dessus et animée, coupe du BRH
   function drawImg(file, alt) { return '<img class="draw-img" src="assets/img/' + file + '" alt="' + esc(alt) + '" loading="lazy" decoding="async">'; }
+  // Chenille vue de côté animée (WebM transparent) ; image fixe si le navigateur ne lit pas la vidéo
+  function trackAnim(alt) {
+    return '<video class="draw-img draw-anim" autoplay muted loop playsinline poster="assets/img/schemas/chenille-cote-poster.png" aria-label="' + esc(alt) + '">' +
+      '<source src="assets/img/schemas/chenille-cote.webm" type="video/webm"></video>';
+  }
   var BRH_TAGS = [['rear', 'right:30.52%;bottom:93.19%'], ['rod', 'left:74.23%;bottom:93.41%'], ['valve', 'right:39.79%;bottom:87.3%'],
     ['cyl', 'right:38.97%;bottom:81.62%'], ['acc', 'right:46.6%;bottom:75.07%'], ['piston', 'right:55.05%;bottom:67.43%'],
     ['front', 'right:65.36%;bottom:59.57%'], ['pin', 'right:69.69%;bottom:53.24%'], ['tool', 'right:80.82%;bottom:34.68%']];
@@ -431,11 +410,11 @@
   function drawingsFor(type, d) {
     var L = C().guide.labels, view = function (i) { return C().guide.tabs[type].views[i]; };
     if (type === 'chenille') return [
-      drawImg('schema-chenille-dessus.jpg', view(0)) + (d.w ? '<p class="draw-cap mono">L × P × N = ' + num(d.w) + ' × ' + num(d.p) + (d.g || '') + ' × ' + d.l + '</p>' : ''),
-      '<video class="draw-img" src="assets/img/chenille-cote.mp4" poster="assets/img/chenille-cote.jpg" autoplay muted loop playsinline aria-label="' + esc(view(1)) + '"></video>'];
-    if (type === 'roadliner') return [DRAW.roadlinerBottom(d, L), drawImg('schema-cote-roadliner.jpg', view(1))];
-    if (type === 'bolton') return [DRAW.boltFace(d, L), drawImg('schema-cote-bolton.jpg', view(1))];
-    if (type === 'clipon') return [DRAW.clipTop(d, L), drawImg('schema-cote-clipon.jpg', view(1))];
+      drawImg('schemas/chenille-dessus.png', view(0)) + (d.w ? '<p class="draw-cap mono">L × P × N = ' + num(d.w) + ' × ' + num(d.p) + (d.g || '') + ' × ' + d.l + '</p>' : ''),
+      trackAnim(view(1))];
+    if (type === 'roadliner') return [DRAW.roadlinerBottom(d, L), drawImg('schemas/roadliner-cote.png', view(1))];
+    if (type === 'bolton') return [DRAW.boltFace(d, L), drawImg('schemas/bolton-cote.png', view(1))];
+    if (type === 'clipon') return [DRAW.clipTop(d, L), drawImg('schemas/clipon-cote.png', view(1))];
     if (type === 'brh') return [brhCut()];
     return [];
   }
@@ -474,7 +453,7 @@
       '<label class="fld"><span>' + t('qs.width') + '</span><input name="w" inputmode="decimal" autocomplete="off" placeholder="400" value="' + esc(pre.w || '') + '"></label>' +
       '<label class="fld"><span>' + t('qs.pitch') + '</span><input name="p" inputmode="decimal" autocomplete="off" placeholder="' + (isPad ? '135' : num(72.5)) + '" value="' + esc(pre.p || '') + '"></label>' +
       '<label class="fld" data-links' + (isPad ? ' hidden' : '') + '><span>' + t('qs.links') + '</span><input name="l" inputmode="numeric" autocomplete="off" placeholder="74" value="' + esc(pre.l || '') + '"></label>' +
-      '<label class="fld" data-links' + (isPad ? ' hidden' : '') + '><span>' + t('qs.guide') + '</span><select name="g" aria-label="' + t('qs.guide') + '"><option value="">' + t('qs.guideAny') + '</option>' +
+      '<label class="fld" data-links' + (isPad ? ' hidden' : '') + '><span>' + t('qs.guide') + '</span><select name="g" aria-label="' + t('qs.guide') + '"><option value="0"' + (pre.g === '0' ? ' selected' : '') + '>' + t('qs.guideAny') + '</option>' +
       uniq(VT.products.map(function (x) { return x.type === 'chenille' ? x.dims.g : ''; }).filter(Boolean)).sort().map(function (g) { return '<option' + (pre.g === g ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>' +
       '<button class="btn btn-o qs-go" type="submit" data-magnetic><span>' + t('qs.go') + '</span></button></form>' +
       '</div>';
@@ -554,7 +533,7 @@
         var catalog = c.value === 'stock' && !inStock;
         var v = c.value === 'stock' ? (inStock || VT.products.length) : c.value;
         return '<li data-reveal><span class="commit-v"><b data-count="' + v + '">' + v + '</b><small>' + unitFor(c.unit) + '</small></span><span class="commit-l">' + t(catalog ? 'c.c4b' : 'c.' + c.key) + '</span><i class="commit-line" aria-hidden="true"></i></li>';
-      }).join('') + '</ul>' + (compact ? '' : '<p class="mono-note" data-reveal="fade">' + t('c.note') + '</p>') + '</div></section>';
+      }).join('') + '</ul>' + (compact || !t('c.note') ? '' : '<p class="mono-note" data-reveal="fade">' + t('c.note') + '</p>') + '</div></section>';
   }
   function crumbs(items) {
     return '<nav class="crumbs" aria-label="breadcrumb" data-reveal="fade"><a href="' + href('home') + '">' + t('cat.home') + '</a>' +
@@ -775,8 +754,10 @@
     var row = function (label, value, cond) { if (cond) rows.push([label, value]); };
     var j = function (vals, sep) { return vals.map(num).join(sep) + ' mm'; };
     if (p.type === 'chenille') {
-      var gk = 'gd.' + d.g, gl = d.g ? (t(gk) === gk ? d.g : d.g + ' · ' + t(gk)) : t('sp.gTbc');
-      rows = [[t('sp.width'), mm(d.w)], [t('sp.pitch'), mm(d.p)], [t('sp.links'), d.l], [t('sp.guide'), gl], [t('sp.matter'), t('sp.matterV')]];
+      var gk = 'gd.' + d.g;
+      rows = [[t('sp.width'), mm(d.w)], [t('sp.pitch'), mm(d.p)], [t('sp.links'), d.l]];
+      if (d.g) rows.push([t('sp.guide'), t(gk) === gk ? d.g : d.g + ' · ' + t(gk)]);
+      rows.push([t('sp.matter'), t('sp.matterV')]);
     } else if (p.type === 'roadliner') {
       row(t('sp.desig'), p.desig, ok(p.desig)); row(t('sp.pitch'), mm(d.p), ok(d.p));
       row(t('sp.holes'), j([d.A, d.B, d.C], ' × '), ok(d.A, d.B, d.C)); row(t('sp.L'), mm(d.L), ok(d.L));
@@ -858,7 +839,7 @@
         '</div>' +
         '<div class="pr-info">' +
         '<p class="pcard-type" data-reveal="fade">' + t('ty.' + p.type) + '</p>' +
-        '<h1 class="pr-title" data-split>' + pname(p) + '</h1>' +
+        '<h1 class="pr-title' + (p.type === 'chenille' ? ' pr-title-1' : '') + '" data-split>' + pname(p) + '</h1>' +
         '<p class="pr-ref mono" data-reveal="fade">' + t('p.ref') + ' ' + esc(p.ref) + '</p>' +
         '<div data-reveal="fade">' + avail(p) + '</div>' + descHTML(p) +
         '<dl class="specs" data-reveal="stagger">' + specRows(p).map(function (row) { return '<div><dt>' + row[0] + '</dt><dd class="mono">' + esc(row[1]) + '</dd></div>'; }).join('') + '</dl>' +
@@ -946,7 +927,7 @@
     } else if (q.w || q.p || q.l) {
       res.list = searchDims(q.type || 'chenille', q.w, q.p, q.l, q.g);
       res.title = t('s.dims'); res.pre = { tab: 'dims', type: q.type, w: q.w, p: q.p, l: q.l, g: q.g };
-      res.sub = [q.type === 'chenille' || !q.type ? t('ty.chenille') : t('ty.patins'), q.w && (t('qs.width') + ' ' + esc(q.w)), q.p && (t('qs.pitch') + ' ' + esc(q.p)), q.l && (t('qs.links') + ' ' + esc(q.l)), q.g && (t('qs.guide') + ' ' + esc(q.g))].filter(Boolean).join(' · ');
+      res.sub = [q.type === 'chenille' || !q.type ? t('ty.chenille') : t('ty.patins'), q.w && (t('qs.width') + ' ' + esc(q.w)), q.p && (t('qs.pitch') + ' ' + esc(q.p)), q.l && (t('qs.links') + ' ' + esc(q.l)), q.g && (t('qs.guide') + ' ' + (q.g === '0' ? t('qs.guideAny') : esc(q.g)))].filter(Boolean).join(' · ');
     } else { res.list = VT.products.slice(); res.title = t('s.all'); }
     return res;
   }
@@ -987,12 +968,12 @@
       '<div class="sheet-grid"><div class="sheet-draws">' + draws.map(function (svg, i) { return '<figure class="sheet-fig"><figcaption class="sheet-tag mono">' + tb.views[i] + '</figcaption>' + svg + '</figure>'; }).join('') + '</div>' +
       '<aside class="sheet-side"><h3 class="mini-t">' + t('g.onMachine') + '</h3><ol class="steps">' + tb.steps.map(function (s) { return '<li><span>' + s + '</span></li>'; }).join('') + '</ol>' +
       '<dl class="legend">' + tb.legend.map(function (l) { return '<div data-hl="' + l[0].split(' ')[0].split('/')[0].trim() + '"><dt class="mono">' + l[0] + '</dt><dd>' + l[1] + '</dd></div>'; }).join('') + '</dl>' +
-      '<div class="desig"><p class="desig-k">' + t('g.designation') + ' : ' + tb.desig[0] + '</p><p class="desig-v mono">' + tb.desig[1] + '</p><p class="desig-s">' + tb.desig[2] + '</p></div>' +
+      (tab === 'chenille' ? '' : '<div class="desig"><p class="desig-k">' + t('g.designation') + ' : ' + tb.desig[0] + '</p><p class="desig-v mono">' + tb.desig[1] + '</p><p class="desig-s">' + tb.desig[2] + '</p></div>') +
       '<p class="note">' + tb.note + '</p></aside></div>' +
       '<form class="measure" data-measure="' + tab + '"><div class="measure-hd"><h3 class="mini-t">' + t('g.measure') + '</h3><p>' + t('g.measureText') + '</p></div>' +
       '<div class="measure-fields">' + GUIDE_FIELDS[tab].map(function (f) {
         var v = ex[f[0]];
-        return '<label class="mfield" data-for="' + f[1] + '"><span class="mono">' + (f[1] === 'N' ? t('qs.links') : f[1]) + '</span><input name="' + f[0] + '" data-key="' + f[1] + '" ' + (f[0] === 'g' ? '' : 'inputmode="decimal" ') + 'autocomplete="off" placeholder="' + num(v) + '"></label>';
+        return '<label class="mfield" data-for="' + f[1] + '"><span class="mono">' + (f[1] === 'N' ? t('qs.links') : tab === 'chenille' && f[1] === 'W' ? 'L' : f[1]) + '</span><input name="' + f[0] + '" data-key="' + f[1] + '" ' + (f[0] === 'g' ? '' : 'inputmode="decimal" ') + 'autocomplete="off" placeholder="' + num(v) + '"></label>';
       }).join('') + '</div>' +
       '<div class="measure-act"><button class="btn btn-o" type="button" data-measure-add data-magnetic><span>' + t('g.addCustom') + '</span></button>' +
       '<button class="btn btn-line" type="button" data-measure-search><span>' + t('g.searchDims') + '</span></button>' +
@@ -1428,6 +1409,7 @@
         '<section class="sec sec-tight"><div class="wrap contact-grid">' +
         '<aside class="contact-side" data-reveal="stagger">' +
         '<a class="contact-card contact-phone" href="tel:' + VT.config.phoneHref + '"><span class="mini-t">' + t('ct.phone') + '</span><b class="mono">' + VT.config.phone + '</b></a>' +
+        '<a class="contact-card contact-wa" href="https://wa.me/' + String(VT.config.phoneHref).replace(/\D/g, '') + '" target="_blank" rel="noopener"><span class="mini-t"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>' + t('ct.wa') + '</span><b class="mono">' + VT.config.phone + '</b><span>' + t('ct.waText') + '</span></a>' +
         '<a class="contact-card" href="mailto:' + VT.config.email + '"><span class="mini-t">' + t('ct.email') + '</span><b class="mono">' + VT.config.email + '</b></a>' +
         '<div class="contact-card"><span class="mini-t">' + t('ct.hours') + '</span><span>' + t('ct.hoursV') + '</span></div>' +
         '<div class="contact-card"><span class="mini-t">' + t('ct.address') + '</span><span>' + t('ct.addressV') + '</span></div></aside>' +

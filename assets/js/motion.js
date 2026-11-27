@@ -157,7 +157,11 @@
   function leave(label) {
     return new Promise(function (res) {
       if (RM) { res(); return; }
-      var pt = $('[data-pt]'); $('.pt-label', pt).textContent = label;
+      var pt = $('[data-pt]'), lab = $('.pt-label', pt);
+      lab.textContent = label; lab.style.fontSize = '';
+      // La référence tient sur une ligne : le corps diminue si besoin
+      var room = window.innerWidth * 0.9;
+      if (lab.scrollWidth > room) lab.style.fontSize = Math.max(18, parseFloat(getComputedStyle(lab).fontSize) * room / lab.scrollWidth) + 'px';
       gsap.set(pt, { visibility: 'visible' });
       var q = gsap.utils.selector(pt);
       gsap.timeline({ onComplete: res })
@@ -398,14 +402,14 @@
   function drawTL(svg) {
     var q = gsap.utils.selector(svg);
     var tl = gsap.timeline({ paused: true });
-    tl.fromTo(q('.part,.pad,.link,.band,.tile,.tile-d,.tile-s,.plate,.screw-r,.screw,.screw-h,.hid,.bsc,.bnut,.chain,.dot,.loop,.loop-in,.idler,.idler-c,.roller,.sprk-wrap,.insert,.bolt,.cbolt,.slotcut,.core'), { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 0)
+    tl.fromTo(q('.part,.pad,.link,.band,.tile,.tile-d,.tile-s,.plate,.sch-img,.screw-r,.screw,.screw-h,.hid,.bsc,.bnut,.chain,.dot,.loop,.loop-in,.idler,.idler-c,.roller,.sprk-wrap,.insert,.bolt,.cbolt,.slotcut,.core'), { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 0)
       .fromTo(q('.lug'), { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.35, stagger: 0.04, ease: 'power2.out' }, 0.1)
       .fromTo(q('.hole,.slot,.clip,.axle,.axle-c'), { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.45, stagger: 0.05, ease: 'back.out(2.2)' }, 0.25)
       .fromTo(q('.guide,.call,.ground'), { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.4)
       .fromTo(q('.ext'), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, stagger: 0.03, ease: 'power1.inOut' }, 0.45)
       .fromTo(q('.dl'), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.55, stagger: 0.08, ease: 'power2.inOut' }, 0.6)
       .fromTo(q('.ah'), { opacity: 0 }, { opacity: 1, duration: 0.2, stagger: 0.03 }, 0.85)
-      .fromTo(q('.dt,.lbl,.tick,.mark'), { opacity: 0 }, { opacity: 1, duration: 0.35, stagger: 0.04 }, 0.9);
+      .fromTo(q('.dt,.dtv,.dtw,.lbl,.tick,.mark'), { opacity: 0 }, { opacity: 1, duration: 0.35, stagger: 0.04 }, 0.9);
     return tl;
   }
   function draw(svg) { drawTL(svg).play(); }

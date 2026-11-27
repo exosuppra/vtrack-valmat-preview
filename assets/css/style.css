@@ -278,6 +278,8 @@ html.js:not(.rm) .hero-title .ln > span { transform: translateY(112%); }
 .hs-more i { font-style: normal; font-size: 34px; transition: transform .45s var(--ease); }
 .hs-more:hover i { transform: translateX(10px); }
 .stock-foot { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; margin-top: 28px; }
+.stock-sec { padding-bottom: clamp(28px, 3vw, 44px); }
+.doors-sec { padding-top: clamp(28px, 3vw, 48px); } /* la section stock est enveloppée par son épinglage */
 .stock-foot .mono-note { margin: 0; }
 
 /* cartes produits */
@@ -435,7 +437,15 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .fbar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 .sel-s { flex: 0 1 210px; background: var(--a); border: 1px solid var(--line); }
 .sel-s select { height: 44px; color: var(--w); font-size: 14px; padding-left: 14px; }
-.sel select option { color: var(--ink); background: var(--w); }
+.sel select option, .fld select option { color: var(--ink); background: #fff; }
+/* Listes déroulantes de la recherche : fond blanc, survol orange (navigateurs qui le permettent) */
+@supports (appearance: base-select) {
+  .qs select, .qs select::picker(select) { appearance: base-select; }
+  .qs select::picker(select) { background: #fff; border: 1px solid #dfe2e5; border-radius: 0; box-shadow: 0 12px 30px rgba(0, 0, 0, .25); }
+  .qs select option { color: var(--ink); background: #fff; padding: 8px 14px; }
+  .qs select option:hover, .qs select option:focus-visible, .qs select option:checked { background: var(--o); color: #fff; }
+  .qs select option::checkmark { display: none; }
+}
 .check { position: relative; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; }
 .check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .check-box { width: 20px; height: 20px; border: 1.5px solid var(--line2); display: grid; place-items: center; flex: none; transition: background .25s, border-color .25s; }
@@ -462,6 +472,7 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .seg button { padding: 10px 13px; background: none; border: 0; color: var(--mut); font: 600 12px var(--fc); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: color .3s, background .3s; }
 .seg [aria-selected="true"] { background: var(--o); color: var(--ink); }
 .pr-title { font: 700 clamp(40px, 5vw, 74px)/.92 var(--fc); text-transform: uppercase; margin: 8px 0 12px; }
+.pr-title-1 { white-space: nowrap; font-size: clamp(24px, 3.6vw, 58px); }
 .pr-ref { color: var(--o); margin: 0 0 6px; font-size: 17px; }
 .pr-info .pcard-type { font-size: 13px; }
 .pr-info .avail { font-size: 14px; }
@@ -542,7 +553,10 @@ html.js:not(.rm) [data-reveal], html.js:not(.rm) [data-split], html.js:not(.rm) 
 .draw .tile-d { fill: rgba(255, 255, 255, .035); stroke: #7d848c; stroke-dasharray: 5 4; }
 .draw .clip { fill: #c3c8ce; }
 /* Schémas fournis en image par Valmat */
-.draw-img { display: block; width: 100%; height: auto; background: #fff; border-radius: 4px; }
+.draw-img { display: block; width: 100%; height: auto; }
+.draw .dtv { fill: var(--o); font-family: var(--fm); font-weight: 600; stroke: var(--a); stroke-width: .16em; paint-order: stroke; }
+.draw .dtw { fill: #e8eaec; font-family: var(--fb); font-weight: 500; stroke: var(--a); stroke-width: .16em; paint-order: stroke; }
+.draw .dim.is-hl .dtv { fill: #ffb067; }
 video.draw-img { background: #383d44; max-width: 960px; margin: 0 auto; }
 .draw-cap { margin: 10px 0 0; color: var(--o); font-size: 17px; }
 .draw-one { grid-template-columns: 1fr !important; }
@@ -746,6 +760,9 @@ video.draw-img { background: #383d44; max-width: 960px; margin: 0 auto; }
 a.contact-card:hover { border-color: var(--o); background: #30343a; }
 .contact-card .mini-t { margin: 0; }
 .contact-card b { font-weight: 500; font-size: 16px; word-break: break-all; }
+.contact-wa .mini-t { display: flex; align-items: center; gap: 8px; color: #25d366; }
+.contact-wa svg { width: 18px; height: 18px; }
+.contact-wa span:last-child { color: var(--mut); font-size: 14px; }
 .contact-phone b { color: var(--o); font-size: 24px; }
 .prefill { font-size: 12px; color: var(--o); margin: 0 0 14px; }
 .about-grid { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
@@ -849,7 +866,7 @@ html:not(.js) .pl, html.rm .pl { display: none; }
 .pt-icon { display: block; color: var(--w); }
 .pt-icon svg { width: 220px; height: auto; }
 .pt-mask { display: block; overflow: hidden; }
-.pt-label { display: block; font: 800 clamp(40px, 7vw, 100px)/.95 var(--fc); text-transform: uppercase; text-align: center; padding: 0 var(--gut) .04em; max-width: 18ch; }
+.pt-label { display: block; font: 800 clamp(40px, 7vw, 100px)/.95 var(--fc); text-transform: uppercase; text-align: center; padding: 0 var(--gut) .04em; white-space: nowrap; }
 .pt-bar { width: 160px; height: 4px; background: rgba(255, 255, 255, .12); overflow: hidden; }
 .pt-bar i { display: block; height: 100%; background: var(--o); transform-origin: left; }
 
